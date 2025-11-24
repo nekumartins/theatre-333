@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Summary{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8">Booking Summary</h1>
+    
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <h2 class="text-2xl font-semibold mb-4">Show Details</h2>
+        <div id="show-info" class="space-y-2 text-gray-700">
+            <p><strong>Show:</strong> <span id="show-title">Loading...</span></p>
+            <p><strong>Venue:</strong> <span id="venue-name">Loading...</span></p>
+            <p><strong>Date:</strong> <span id="performance-date">Loading...</span></p>
+            <p><strong>Time:</strong> <span id="performance-time">Loading...</span></p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <h2 class="text-2xl font-semibold mb-4">Selected Seats</h2>
+        <div id="seats-list" class="space-y-2">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <h2 class="text-2xl font-semibold mb-4">Price Breakdown</h2>
+        <div class="space-y-2">
+            <div class="flex justify-between">
+                <span>Tickets (<span id="ticket-count">0</span>)</span>
+                <span>$<span id="subtotal">0.00</span></span>
+            </div>
+            <div class="flex justify-between">
+                <span>Booking Fee</span>
+                <span>$<span id="booking-fee">2.00</span></span>
+            </div>
+            <hr class="my-4">
+            <div class="flex justify-between text-xl font-bold">
+                <span>Total</span>
+                <span>$<span id="total-amount">0.00</span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex space-x-4">
+        <button onclick="window.history.back()" 
+                class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-400">
+            Go Back
+        </button>
+        <button id="confirm-btn" 
+                class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700">
+            Confirm & Pay
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Get booking ID from URL or session storage
+    const bookingId = new URLSearchParams(window.location.search).get('booking_id');
+    
+    if (!bookingId) {
+        alert('No booking found');
+        window.location.href = '/shows';
+    }
+
+    // Load booking details
+    async function loadBookingDetails() {
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`);
+            const booking = await response.json();
+            
+            // Populate show info
+            document.getElementById('show-title').textContent = booking.show_title;
+            document.getElementById('venue-name').textContent = booking.venue_name;
+            document.getElementById('performance-date').textContent = new Date(booking.performance_date).toLocaleDateString();
+            document.getElementById('performance-time').textContent = booking.start_time;
+            
+            // Populate seats
+            const seatsList = document.getElementById('seats-list');
+            booking.seats.forEach(seat => {
+                const seatDiv = document.createElement('div');
+                seatDiv.className = 'flex justify-between';
+                seatDiv.innerHTML = `
+                    <span>Row ${seat.row}, Seat ${seat.number} (${seat.category})</span>
+                    <span>$${seat.price.toFixed(2)}</span>
+                `;
+                seatsList.appendChild(seatDiv);
+            });
+            
+            // Calculate totals
+            const subtotal = booking.total_amount;
+            const bookingFee = 2.00;
+            const total = subtotal + bookingFee;
+            
+            document.getElementById('ticket-count').textContent = booking.seats.length;
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('total-amount').textContent = total.toFixed(2);
+            
+        } catch (error) {
+            console.error('Error loading booking:', error);
+            alert('Failed to load booking details');
+        }
+    }
+
+    loadBookingDetails();
+
+    // Proceed to payment
+    document.getElementById('confirm-btn').addEventListener('click', function() {
+        window.location.href = `/payment?booking_id=${bookingId}`;
+    });
+</script>
+{% endblock %}

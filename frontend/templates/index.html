@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Theatre Booking System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg p-12 mb-12 shadow-xl">
+    <h1 class="text-5xl font-bold mb-4">Welcome to Theatre Booking</h1>
+    <p class="text-xl mb-6">Experience the magic of live theatre. Book your tickets now!</p>
+    <a href="/shows" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+        Browse Shows
+    </a>
+</div>
+
+<!-- Featured Shows Section -->
+<section class="mb-12">
+    <h2 class="text-3xl font-bold mb-6">Featured Shows</h2>
+    <div id="featured-shows" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center text-gray-500">Loading shows...</div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="bg-white rounded-lg p-8 shadow-md mb-12">
+    <h2 class="text-3xl font-bold mb-8 text-center">How It Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="text-center">
+            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span class="text-2xl">🎭</span>
+            </div>
+            <h3 class="font-semibold mb-2">Browse Shows</h3>
+            <p class="text-gray-600 text-sm">Explore our collection of amazing theatre performances</p>
+        </div>
+        <div class="text-center">
+            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span class="text-2xl">🎫</span>
+            </div>
+            <h3 class="font-semibold mb-2">Select Seats</h3>
+            <p class="text-gray-600 text-sm">Choose your preferred seats from our interactive seat map</p>
+        </div>
+        <div class="text-center">
+            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span class="text-2xl">💳</span>
+            </div>
+            <h3 class="font-semibold mb-2">Make Payment</h3>
+            <p class="text-gray-600 text-sm">Secure payment processing for your tickets</p>
+        </div>
+        <div class="text-center">
+            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span class="text-2xl">✉️</span>
+            </div>
+            <h3 class="font-semibold mb-2">Get Tickets</h3>
+            <p class="text-gray-600 text-sm">Receive your e-tickets via email instantly</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Load featured shows
+    async function loadFeaturedShows() {
+        try {
+            const response = await fetch('/api/shows/?status=Active');
+            const shows = await response.json();
+            
+            const container = document.getElementById('featured-shows');
+            if (shows.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 col-span-3">No shows available at the moment.</p>';
+                return;
+            }
+            
+            container.innerHTML = shows.slice(0, 3).map(show => `
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+                    <img src="${show.poster_url || '/static/images/placeholder.jpg'}" 
+                         alt="${show.title}" 
+                         class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold mb-2">${show.title}</h3>
+                        <p class="text-gray-600 text-sm mb-2">${show.description ? show.description.substring(0, 100) + '...' : ''}</p>
+                        <p class="text-sm text-indigo-600 mb-4">${show.duration_minutes} minutes</p>
+                        <a href="/shows/${show.show_id}" 
+                           class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition inline-block">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading shows:', error);
+            document.getElementById('featured-shows').innerHTML = 
+                '<p class="text-red-500 col-span-3">Error loading shows. Please try again later.</p>';
+        }
+    }
+    
+    loadFeaturedShows();
+</script>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Show Details{% endblock %}
+
+{% block content %}
+<div id="show-details" class="max-w-4xl mx-auto">
+    <div class="text-center text-gray-500">Loading show details...</div>
+</div>
+
+<div id="performances-section" class="max-w-4xl mx-auto mt-8">
+    <!-- Performances will load here -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Get show ID from URL path
+    const pathParts = window.location.pathname.split('/');
+    const showId = parseInt(pathParts[pathParts.length - 1]);
+    
+    async function loadShowDetails() {
+        try {
+            const response = await fetch(`/api/shows/${showId}`);
+            const show = await response.json();
+            
+            document.getElementById('show-details').innerHTML = `
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <img src="${show.poster_url || '/static/images/placeholder.jpg'}" 
+                         alt="${show.title}" 
+                         class="w-full h-64 object-cover">
+                    <div class="p-8">
+                        <h1 class="text-4xl font-bold mb-4">${show.title}</h1>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <p class="text-gray-600"><strong>Genre:</strong> ${show.genre ? show.genre.genre_name : 'N/A'}</p>
+                                <p class="text-gray-600"><strong>Duration:</strong> ${show.duration_minutes} minutes</p>
+                                <p class="text-gray-600"><strong>Language:</strong> ${show.language || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600"><strong>Director:</strong> ${show.director || 'N/A'}</p>
+                                <p class="text-gray-600"><strong>Producer:</strong> ${show.producer || 'N/A'}</p>
+                                <p class="text-gray-600"><strong>Age Rating:</strong> ${show.age_rating || 'NR'}</p>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold mb-2">Description</h3>
+                            <p class="text-gray-700">${show.description || 'No description available.'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            loadPerformances();
+        } catch (error) {
+            console.error('Error loading show details:', error);
+            document.getElementById('show-details').innerHTML = 
+                '<p class="text-red-500">Error loading show details.</p>';
+        }
+    }
+    
+    async function loadPerformances() {
+        try {
+            const response = await fetch(`/api/performances/show/${showId}`);
+            const performances = await response.json();
+            
+            const container = document.getElementById('performances-section');
+            if (performances.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                        <p class="text-gray-500">No upcoming performances scheduled.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="bg-white rounded-lg shadow-md p-8">
+                    <h2 class="text-2xl font-bold mb-6">Upcoming Performances</h2>
+                    <div class="space-y-4">
+                        ${performances.map(perf => `
+                            <div class="border-b pb-4 flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold">${new Date(perf.performance_date).toLocaleDateString()}</p>
+                                    <p class="text-gray-600">Time: ${perf.start_time}</p>
+                                    <p class="text-sm text-gray-500">Venue: ${perf.venue ? perf.venue.venue_name : 'N/A'}</p>
+                                    <p class="text-sm ${perf.available_seats > 0 ? 'text-green-600' : 'text-red-600'}">
+                                        ${perf.available_seats} seats available
+                                    </p>
+                                </div>
+                                <a href="/performance/${perf.performance_id}/seats" 
+                                   class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 ${perf.available_seats === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
+                                    ${perf.available_seats > 0 ? 'Book Now' : 'Sold Out'}
+                                </a>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error loading performances:', error);
+        }
+    }
+    
+    loadShowDetails();
+</script>
+{% endblock %}

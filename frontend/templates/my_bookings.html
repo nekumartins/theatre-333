@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold mb-8">My Bookings</h1>
+    
+    <div id="bookings-container">
+        <div class="text-center text-gray-500">Loading your bookings...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadBookings() {
+        // For demo, using user_id = 1 (should come from authentication)
+        const userId = localStorage.getItem('user_id') || 1;
+        
+        try {
+            const response = await fetch(`/api/bookings/user/${userId}`);
+            const bookings = await response.json();
+            
+            const container = document.getElementById('bookings-container');
+            
+            if (bookings.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                        <p class="text-gray-500 mb-4">You have no bookings yet.</p>
+                        <a href="/shows" class="bg-indigo-600 text-white px-6 py-3 rounded hover:bg-indigo-700 inline-block">
+                            Browse Shows
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = bookings.map(booking => {
+                const seats = booking.booking_details.map(d => `${d.row_number}${d.seat_number}`).join(', ');
+                const statusColor = {
+                    'Confirmed': 'text-green-600',
+                    'Pending': 'text-yellow-600',
+                    'Cancelled': 'text-red-600'
+                }[booking.booking_status] || 'text-gray-600';
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-semibold mb-2">
+                                    ${booking.performance ? booking.performance.show.title : 'N/A'}
+                                </h3>
+                                <p class="text-gray-600 mb-2">
+                                    <strong>Date:</strong> ${booking.performance ? new Date(booking.performance.performance_date).toLocaleDateString() : 'N/A'} 
+                                    at ${booking.performance ? booking.performance.start_time : 'N/A'}
+                                </p>
+                                <p class="text-gray-600 mb-2">
+                                    <strong>Venue:</strong> ${booking.performance && booking.performance.venue ? booking.performance.venue.venue_name : 'N/A'}
+                                </p>
+                                <p class="text-gray-600 mb-2">
+                                    <strong>Seats:</strong> ${seats}
+                                </p>
+                                <p class="text-gray-600 mb-2">
+                                    <strong>Booking Reference:</strong> ${booking.booking_reference}
+                                </p>
+                                <p class="text-gray-600 mb-2">
+                                    <strong>Booked on:</strong> ${new Date(booking.booking_date).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-indigo-600 mb-2">
+                                    $${parseFloat(booking.total_amount).toFixed(2)}
+                                </p>
+                                <p class="${statusColor} font-semibold mb-4">
+                                    ${booking.booking_status}
+                                </p>
+                                ${booking.booking_status === 'Pending' ? `
+                                    <a href="/booking/${booking.booking_id}/payment" 
+                                       class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 inline-block mb-2">
+                                        Complete Payment
+                                    </a>
+                                ` : ''}
+                                ${booking.booking_status !== 'Cancelled' ? `
+                                    <button onclick="cancelBooking(${booking.booking_id})" 
+                                            class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 block w-full">
+                                        Cancel Booking
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error loading bookings:', error);
+            document.getElementById('bookings-container').innerHTML = 
+                '<p class="text-red-500 text-center">Error loading bookings.</p>';
+        }
+    }
+    
+    async function cancelBooking(bookingId) {
+        if (!confirm('Are you sure you want to cancel this booking?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert('Booking cancelled successfully!');
+                loadBookings(); // Reload bookings
+            } else {
+                alert('Error cancelling booking: ' + (data.detail || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error cancelling booking:', error);
+            alert('Error cancelling booking. Please try again.');
+        }
+    }
+    
+    loadBookings();
+</script>
+{% endblock %}

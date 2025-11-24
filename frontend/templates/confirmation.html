@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmed{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto text-center">
+    <div class="bg-white rounded-lg shadow-lg p-12">
+        <!-- Success Icon -->
+        <div class="mb-6">
+            <svg class="mx-auto h-24 w-24 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-4xl font-bold text-green-600 mb-4">Booking Confirmed!</h1>
+        <p class="text-xl text-gray-600 mb-8">Thank you for your purchase</p>
+        
+        <div class="bg-gray-100 rounded-lg p-6 mb-8 text-left">
+            <h2 class="text-xl font-semibold mb-4">Booking Details</h2>
+            <div class="space-y-2 text-gray-700">
+                <p><strong>Booking Reference:</strong> <span id="booking-ref" class="font-mono">Loading...</span></p>
+                <p><strong>Show:</strong> <span id="show-title">Loading...</span></p>
+                <p><strong>Date:</strong> <span id="performance-date">Loading...</span></p>
+                <p><strong>Time:</strong> <span id="performance-time">Loading...</span></p>
+                <p><strong>Venue:</strong> <span id="venue-name">Loading...</span></p>
+                <p><strong>Seats:</strong> <span id="seats">Loading...</span></p>
+                <p><strong>Total Paid:</strong> $<span id="total-amount">0.00</span></p>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <p class="text-sm text-blue-800">
+                📧 A confirmation email has been sent to your registered email address with your e-ticket.
+            </p>
+        </div>
+        
+        <div class="space-y-4">
+            <button id="print-btn" 
+                    class="w-full bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700">
+                🖨️ Print Confirmation
+            </button>
+            <div class="flex space-x-4">
+                <a href="/my-bookings" 
+                   class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 block">
+                    View My Bookings
+                </a>
+                <a href="/shows" 
+                   class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 block">
+                    Book More Shows
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const bookingId = new URLSearchParams(window.location.search).get('booking_id');
+    
+    if (!bookingId) {
+        alert('No booking found');
+        window.location.href = '/shows';
+    }
+
+    async function loadConfirmation() {
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`);
+            const booking = await response.json();
+            
+            document.getElementById('booking-ref').textContent = booking.booking_reference;
+            document.getElementById('show-title').textContent = booking.show_title;
+            document.getElementById('performance-date').textContent = new Date(booking.performance_date).toLocaleDateString();
+            document.getElementById('performance-time').textContent = booking.start_time;
+            document.getElementById('venue-name').textContent = booking.venue_name;
+            document.getElementById('seats').textContent = booking.seats.map(s => `Row ${s.row} Seat ${s.number}`).join(', ');
+            document.getElementById('total-amount').textContent = booking.total_amount.toFixed(2);
+            
+        } catch (error) {
+            console.error('Error loading confirmation:', error);
+        }
+    }
+
+    loadConfirmation();
+
+    document.getElementById('print-btn').addEventListener('click', function() {
+        window.print();
+    });
+</script>
+{% endblock %}

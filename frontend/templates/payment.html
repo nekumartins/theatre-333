@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center">Complete Payment</h1>
+    
+    <div id="booking-details" class="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <div class="text-center text-gray-500">Loading booking details...</div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h2 class="text-2xl font-semibold mb-6">Payment Information</h2>
+        
+        <form id="payment-form" class="space-y-4">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Payment Method</label>
+                <select id="payment-method" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Digital Wallet">Digital Wallet</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Card Number</label>
+                <input type="text" id="card-number" 
+                       class="w-full border border-gray-300 rounded px-4 py-2" 
+                       placeholder="1234 5678 9012 3456"
+                       maxlength="19"
+                       required>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Expiry Date</label>
+                    <input type="text" id="expiry-date" 
+                           class="w-full border border-gray-300 rounded px-4 py-2" 
+                           placeholder="MM/YY"
+                           maxlength="5"
+                           required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">CVV</label>
+                    <input type="text" id="cvv" 
+                           class="w-full border border-gray-300 rounded px-4 py-2" 
+                           placeholder="123"
+                           maxlength="3"
+                           required>
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2">Cardholder Name</label>
+                <input type="text" id="cardholder-name" 
+                       class="w-full border border-gray-300 rounded px-4 py-2" 
+                       placeholder="John Doe"
+                       required>
+            </div>
+            
+            <div class="pt-4">
+                <button type="submit" 
+                        class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                    Pay Now - $<span id="payment-amount">0.00</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Get booking ID from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = parseInt(urlParams.get('booking_id'));
+    let bookingAmount = 0;
+    
+    async function loadBookingDetails() {
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`);
+            const booking = await response.json();
+            bookingAmount = parseFloat(booking.total_amount);
+            
+            const seats = booking.booking_details.map(d => `${d.row_number}${d.seat_number}`).join(', ');
+            
+            document.getElementById('booking-details').innerHTML = `
+                <h3 class="text-xl font-semibold mb-4">Booking Summary</h3>
+                <div class="space-y-2">
+                    <p><strong>Booking Reference:</strong> ${booking.booking_reference}</p>
+                    <p><strong>Performance:</strong> ${booking.performance ? booking.performance.show.title : 'N/A'}</p>
+                    <p><strong>Date:</strong> ${booking.performance ? new Date(booking.performance.performance_date).toLocaleDateString() : 'N/A'}</p>
+                    <p><strong>Seats:</strong> ${seats}</p>
+                    <p class="text-2xl font-bold text-indigo-600 pt-4">Total: $${bookingAmount.toFixed(2)}</p>
+                </div>
+            `;
+            
+            document.getElementById('payment-amount').textContent = bookingAmount.toFixed(2);
+        } catch (error) {
+            console.error('Error loading booking:', error);
+            document.getElementById('booking-details').innerHTML = 
+                '<p class="text-red-500">Error loading booking details.</p>';
+        }
+    }
+    
+    document.getElementById('payment-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const cardNumber = document.getElementById('card-number').value;
+        const cardLast4 = cardNumber.slice(-4);
+        
+        try {
+            const response = await fetch('/api/payments/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    booking_id: bookingId,
+                    payment_amount: bookingAmount,
+                    payment_method: document.getElementById('payment-method').value,
+                    card_last_four: cardLast4
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                alert('Payment successful! Transaction ID: ' + data.transaction_id);
+                window.location.href = `/my-bookings`;
+            } else {
+                alert('Payment failed: ' + (data.detail || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            alert('Error processing payment. Please try again.');
+        }
+    });
+    
+    // Simple input formatting
+    document.getElementById('card-number').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '');
+        let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+        e.target.value = formattedValue;
+    });
+    
+    document.getElementById('expiry-date').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.slice(0, 2) + '/' + value.slice(2, 4);
+        }
+        e.target.value = value;
+    });
+    
+    loadBookingDetails();
+</script>
+{% endblock %}

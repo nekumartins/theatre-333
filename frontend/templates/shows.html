@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Shows{% endblock %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8">Available Shows</h1>
+
+<!-- Filter Section -->
+<div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex gap-4">
+        <select id="genre-filter" class="border border-gray-300 rounded px-4 py-2">
+            <option value="">All Genres</option>
+        </select>
+        <button onclick="loadShows()" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
+            Apply Filter
+        </button>
+    </div>
+</div>
+
+<!-- Shows Grid -->
+<div id="shows-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="col-span-3 text-center text-gray-500">Loading shows...</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadGenres() {
+        try {
+            const response = await fetch('/api/shows/genres/');
+            const genres = await response.json();
+            const select = document.getElementById('genre-filter');
+            genres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre.genre_name;
+                option.textContent = genre.genre_name;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading genres:', error);
+        }
+    }
+
+    async function loadShows() {
+        try {
+            const genre = document.getElementById('genre-filter').value;
+            let url = '/api/shows/?status=Active';
+            if (genre) {
+                url += `&genre=${genre}`;
+            }
+            
+            const response = await fetch(url);
+            const shows = await response.json();
+            
+            const container = document.getElementById('shows-container');
+            if (shows.length === 0) {
+                container.innerHTML = '<p class="col-span-3 text-center text-gray-500">No shows found.</p>';
+                return;
+            }
+            
+            container.innerHTML = shows.map(show => `
+                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
+                    <img src="${show.poster_url || '/static/images/placeholder.jpg'}" 
+                         alt="${show.title}" 
+                         class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h2 class="text-2xl font-semibold mb-2">${show.title}</h2>
+                        <p class="text-gray-600 mb-2">${show.genre ? show.genre.genre_name : 'N/A'}</p>
+                        <p class="text-sm text-gray-500 mb-4">${show.duration_minutes} minutes | ${show.age_rating || 'NR'}</p>
+                        <a href="/shows/${show.show_id}" 
+                           class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 inline-block">
+                            View Details & Book
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading shows:', error);
+            document.getElementById('shows-container').innerHTML = 
+                '<p class="col-span-3 text-center text-red-500">Error loading shows.</p>';
+        }
+    }
+    
+    loadGenres();
+    loadShows();
+</script>
+{% endblock %}
