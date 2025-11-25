@@ -1,98 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Theatre Booking System{% endblock %}
+{% block title %}Welcome - Theatre Booking{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg p-12 mb-12 shadow-xl">
-    <h1 class="text-5xl font-bold mb-4">Welcome to Theatre Booking</h1>
-    <p class="text-xl mb-6">Experience the magic of live theatre. Book your tickets now!</p>
-    <a href="/shows" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
-        Browse Shows
-    </a>
+<div class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-pink-500/5"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                    Experience Live Theatre
+                </span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+                Book tickets to world-class performances. From classic dramas to modern musicals.
+            </p>
+            <div id="heroButtons" class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/shows" class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50">
+                    Browse Shows
+                </a>
+                <a href="/register" id="signUpBtn" class="px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-all border border-purple-500/20">
+                    Sign Up Free
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Featured Shows Section -->
-<section class="mb-12">
-    <h2 class="text-3xl font-bold mb-6">Featured Shows</h2>
-    <div id="featured-shows" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="text-center text-gray-500">Loading shows...</div>
-    </div>
-</section>
+<!-- Features -->
+<div class="py-20 bg-gradient-to-b from-transparent to-purple-500/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-white mb-4">Why Choose Us</h2>
+            <p class="text-gray-400">The best theatre booking experience</p>
+        </div>
 
-<!-- How It Works -->
-<section class="bg-white rounded-lg p-8 shadow-md mb-12">
-    <h2 class="text-3xl font-bold mb-8 text-center">How It Works</h2>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="text-center">
-            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl">🎭</span>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="p-8 rounded-xl bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 hover:border-purple-500/40 transition-all">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-2xl mb-4">
+                    🎭
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Premium Shows</h3>
+                <p class="text-gray-400">Curated selection of world-class theatrical performances</p>
             </div>
-            <h3 class="font-semibold mb-2">Browse Shows</h3>
-            <p class="text-gray-600 text-sm">Explore our collection of amazing theatre performances</p>
-        </div>
-        <div class="text-center">
-            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl">🎫</span>
+
+            <div class="p-8 rounded-xl bg-gradient-to-br from-pink-500/10 to-transparent border border-pink-500/20 hover:border-pink-500/40 transition-all">
+                <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-purple-500 rounded-lg flex items-center justify-center text-2xl mb-4">
+                    💺
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Interactive Seating</h3>
+                <p class="text-gray-400">Choose your perfect seat with our visual seating map</p>
             </div>
-            <h3 class="font-semibold mb-2">Select Seats</h3>
-            <p class="text-gray-600 text-sm">Choose your preferred seats from our interactive seat map</p>
-        </div>
-        <div class="text-center">
-            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl">💳</span>
+
+            <div class="p-8 rounded-xl bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 hover:border-purple-500/40 transition-all">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-2xl mb-4">
+                    ✓
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Instant Confirmation</h3>
+                <p class="text-gray-400">Secure booking with immediate confirmation</p>
             </div>
-            <h3 class="font-semibold mb-2">Make Payment</h3>
-            <p class="text-gray-600 text-sm">Secure payment processing for your tickets</p>
-        </div>
-        <div class="text-center">
-            <div class="bg-indigo-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <span class="text-2xl">✉️</span>
-            </div>
-            <h3 class="font-semibold mb-2">Get Tickets</h3>
-            <p class="text-gray-600 text-sm">Receive your e-tickets via email instantly</p>
         </div>
     </div>
-</section>
-{% endblock %}
+</div>
 
-{% block scripts %}
+<!-- Current Shows -->
+<div class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-white mb-4">Now Showing</h2>
+            <p class="text-gray-400 text-lg">Don't miss these incredible performances</p>
+        </div>
+        
+        <div id="showsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Shows will be loaded here -->
+        </div>
+
+        <div class="mt-12 text-center">
+            <a href="/shows" class="inline-flex items-center px-6 py-3 bg-white/5 hover:bg-white/10 text-purple-400 hover:text-purple-300 rounded-lg font-medium transition-all border border-purple-500/20">
+                View All Shows →
+            </a>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Load featured shows
-    async function loadFeaturedShows() {
+    // Check if user is logged in and adjust hero section
+    const token = localStorage.getItem('access_token');
+    const userEmail = localStorage.getItem('user_email');
+    
+    if (token) {
+        // User is logged in - hide sign up button and personalize
+        const signUpBtn = document.getElementById('signUpBtn');
+        if (signUpBtn) {
+            signUpBtn.style.display = 'none';
+        }
+        
+        // Optionally add a "My Bookings" button instead
+        const heroButtons = document.getElementById('heroButtons');
+        const bookingsBtn = document.createElement('a');
+        bookingsBtn.href = '/my-bookings';
+        bookingsBtn.className = 'px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-all border border-purple-500/20';
+        bookingsBtn.textContent = 'My Bookings';
+        heroButtons.appendChild(bookingsBtn);
+    }
+
+    async function loadShows() {
         try {
-            const response = await fetch('/api/shows/?status=Active');
-            const shows = await response.json();
+            const response = await fetch('https://api.tvmaze.com/shows');
+            const allShows = await response.json();
+            const shows = allShows.slice(0, 4);
             
-            const container = document.getElementById('featured-shows');
-            if (shows.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 col-span-3">No shows available at the moment.</p>';
-                return;
-            }
-            
-            container.innerHTML = shows.slice(0, 3).map(show => `
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
-                    <img src="${show.poster_url || '/static/images/placeholder.jpg'}" 
-                         alt="${show.title}" 
-                         class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h3 class="text-xl font-semibold mb-2">${show.title}</h3>
-                        <p class="text-gray-600 text-sm mb-2">${show.description ? show.description.substring(0, 100) + '...' : ''}</p>
-                        <p class="text-sm text-indigo-600 mb-4">${show.duration_minutes} minutes</p>
-                        <a href="/shows/${show.show_id}" 
-                           class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition inline-block">
-                            View Details
-                        </a>
+            const container = document.getElementById('showsContainer');
+            container.innerHTML = shows.map(show => {
+                const imageUrl = show.image ? show.image.medium : null;
+                const rating = show.rating && show.rating.average ? `⭐ ${show.rating.average}/10` : 'New';
+                
+                return `
+                <div class="group relative bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition-all hover:shadow-xl hover:shadow-purple-500/10">
+                    <div class="h-56 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-6xl relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] to-transparent opacity-60"></div>
+                        <span class="relative z-10">🎭</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">${show.title}</h3>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">${show.description || 'A must-see performance'}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-purple-400 text-sm font-medium">${rating}</span>
+                            <a href="${show.url}" target="_blank" rel="noopener noreferrer" class="text-pink-400 hover:text-pink-300 font-medium text-sm transition-colors">
+                                Details →
+                            </a>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         } catch (error) {
             console.error('Error loading shows:', error);
-            document.getElementById('featured-shows').innerHTML = 
-                '<p class="text-red-500 col-span-3">Error loading shows. Please try again later.</p>';
         }
     }
-    
-    loadFeaturedShows();
+
+    loadShows();
 </script>
 {% endblock %}

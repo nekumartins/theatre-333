@@ -3,81 +3,97 @@
 {% block title %}Browse Shows{% endblock %}
 
 {% block content %}
-<h1 class="text-4xl font-bold mb-8">Available Shows</h1>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Available Shows</h1>
 
-<!-- Filter Section -->
-<div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <div class="flex gap-4">
-        <select id="genre-filter" class="border border-gray-300 rounded px-4 py-2">
-            <option value="">All Genres</option>
-        </select>
-        <button onclick="loadShows()" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
-            Apply Filter
-        </button>
+    <!-- Filter Section -->
+    <div class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-lg border border-purple-500/20 p-6 mb-8">
+        <div class="flex gap-4">
+            <select id="genre-filter" class="flex-1 bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-3 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                <option value="">All Genres</option>
+            </select>
+            <button onclick="loadShows()" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50">
+                Apply Filter
+            </button>
+        </div>
     </div>
-</div>
 
-<!-- Shows Grid -->
-<div id="shows-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="col-span-3 text-center text-gray-500">Loading shows...</div>
+    <!-- Shows Grid -->
+    <div id="shows-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="col-span-3 text-center text-gray-400">Loading shows...</div>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
     async function loadGenres() {
-        try {
-            const response = await fetch('/api/shows/genres/');
-            const genres = await response.json();
-            const select = document.getElementById('genre-filter');
-            genres.forEach(genre => {
-                const option = document.createElement('option');
-                option.value = genre.genre_name;
-                option.textContent = genre.genre_name;
-                select.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading genres:', error);
-        }
+        const select = document.getElementById('genre-filter');
+        const genres = ['Drama', 'Comedy', 'Action', 'Science-Fiction', 'Thriller', 'Horror', 'Musical', 'Romance'];
+        genres.forEach(genre => {
+            const option = document.createElement('option');
+            option.value = genre;
+            option.textContent = genre;
+            select.appendChild(option);
+        });
     }
 
     async function loadShows() {
         try {
             const genre = document.getElementById('genre-filter').value;
-            let url = '/api/shows/?status=Active';
+            // Fetch from TVMaze API
+            const response = await fetch('https://api.tvmaze.com/shows');
+            let shows = await response.json();
+            
+            // Filter by genre if selected
             if (genre) {
-                url += `&genre=${genre}`;
+                shows = shows.filter(show => 
+                    show.genres && show.genres.some(g => g.toLowerCase() === genre.toLowerCase())
+                );
             }
             
-            const response = await fetch(url);
-            const shows = await response.json();
+            // Limit to 30 shows
+            shows = shows.slice(0, 30);
             
             const container = document.getElementById('shows-container');
             if (shows.length === 0) {
-                container.innerHTML = '<p class="col-span-3 text-center text-gray-500">No shows found.</p>';
+                container.innerHTML = '<p class="col-span-3 text-center text-gray-400">No shows found.</p>';
                 return;
             }
             
-            container.innerHTML = shows.map(show => `
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition">
-                    <img src="${show.poster_url || '/static/images/placeholder.jpg'}" 
-                         alt="${show.title}" 
-                         class="w-full h-48 object-cover">
-                    <div class="p-4">
-                        <h2 class="text-2xl font-semibold mb-2">${show.title}</h2>
-                        <p class="text-gray-600 mb-2">${show.genre ? show.genre.genre_name : 'N/A'}</p>
-                        <p class="text-sm text-gray-500 mb-4">${show.duration_minutes} minutes | ${show.age_rating || 'NR'}</p>
-                        <a href="/shows/${show.show_id}" 
-                           class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 inline-block">
-                            View Details & Book
+            container.innerHTML = shows.map(show => {
+                const genres = show.genres && show.genres.length > 0 ? show.genres.join(', ') : 'N/A';
+                const rating = show.rating && show.rating.average ? `⭐ ${show.rating.average}/10` : 'No rating';
+                const imageUrl = show.image ? show.image.medium : null;
+                
+                return `
+                <div class="group bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition-all hover:shadow-xl hover:shadow-purple-500/10">
+                    ${imageUrl ? `
+                    <div class="h-56 relative overflow-hidden">
+                        <img src="${imageUrl}" alt="${show.name}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] to-transparent opacity-60"></div>
+                    </div>
+                    ` : `
+                    <div class="h-56 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-6xl relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] to-transparent opacity-60"></div>
+                        <span class="relative z-10">🎭</span>
+                    </div>
+                    `}
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors line-clamp-1">${show.name}</h2>
+                        <p class="text-purple-400 text-sm font-medium mb-2">${genres}</p>
+                        <p class="text-sm text-gray-400 mb-4">${rating} • ${show.language || 'English'}</p>
+                        <a href="${show.url}" target="_blank" rel="noopener noreferrer"
+                           class="inline-block px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/20">
+                            View Details
                         </a>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         } catch (error) {
             console.error('Error loading shows:', error);
             document.getElementById('shows-container').innerHTML = 
-                '<p class="col-span-3 text-center text-red-500">Error loading shows.</p>';
+                '<p class="col-span-3 text-center text-pink-400">Error loading shows.</p>';
         }
     }
     

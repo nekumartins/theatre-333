@@ -1,37 +1,71 @@
-/* Custom styles for Theatre Booking System */
+/* Solarized Dark Theme - Custom Component Styles */
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
+/* Seat selection interactive styles */
 .seat {
-    transition: all 0.2s ease;
+    @apply w-10 h-10 m-1 rounded-md cursor-pointer inline-flex items-center justify-center text-xs font-semibold transition-all duration-200;
+    border: 2px solid #586e75;
+    background: #073642;
+    color: #93a1a1;
 }
 
-.seat:hover:not([data-booked]) {
-    transform: scale(1.1);
+.seat:hover:not(.booked):not(.selected) {
+    @apply scale-105;
+    border-color: #268bd2;
+    background: #002b36;
 }
 
-/* Loading animation */
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
+.seat.available {
+    background: #073642;
+    border-color: #859900;
 }
 
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.seat.selected {
+    @apply scale-110;
+    background: #268bd2;
+    border-color: #268bd2;
+    color: white;
 }
 
-/* Card hover effects */
-.hover\:shadow-xl:hover {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+.seat.booked {
+    @apply cursor-not-allowed opacity-40;
+    background: #586e75;
+    border-color: #586e75;
 }
 
-/* Smooth transitions */
-* {
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.seat-vip { border-color: #6c71c4; }
+.seat-premium { border-color: #2aa198; }
+.seat-standard { border-color: #859900; }
+.seat-economy { border-color: #b58900; }
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    @apply w-2 h-2;
+}
+
+::-webkit-scrollbar-track {
+    background: #002b36;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply rounded;
+    background: #586e75;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #657b83;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
