@@ -35,7 +35,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(database.get_d
     return {"message": "User registered successfully", "user_id": new_user.user_id}
 
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login")
 def login(credentials: schemas.UserLogin, db: Session = Depends(database.get_db)):
     """User login and JWT token generation"""
     user = db.query(models.User).filter(models.User.email == credentials.email).first()
@@ -44,9 +44,19 @@ def login(credentials: schemas.UserLogin, db: Session = Depends(database.get_db)
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Generate JWT token
-    access_token = auth.create_access_token(data={"sub": user.email, "user_id": user.user_id})
+    access_token = auth.create_access_token(data={
+        "sub": user.email, 
+        "user_id": user.user_id,
+        "first_name": user.first_name,
+        "last_name": user.last_name
+    })
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "first_name": user.first_name,
+        "last_name": user.last_name
+    }
 
 
 @router.get("/me", response_model=schemas.UserResponse)

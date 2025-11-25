@@ -42,9 +42,25 @@
 
 {% block scripts %}
 <script>
-    // Redirect if already logged in
-    if (localStorage.getItem('access_token')) {
+    // Check if token is valid
+    function isTokenValid(token) {
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            return Date.now() < exp;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Redirect if already logged in with valid token
+    const existingToken = localStorage.getItem('access_token');
+    if (existingToken && isTokenValid(existingToken)) {
         window.location.href = '/shows';
+    } else if (existingToken) {
+        // Clear expired token
+        localStorage.clear();
     }
 
     document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -65,10 +81,11 @@
             if (response.ok) {
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('user_email', email);
+                localStorage.setItem('user_first_name', data.first_name);
                 
                 // Show success message briefly then redirect
                 const btn = document.querySelector('button[type="submit"]');
-                btn.textContent = '✓ Login successful!';
+                btn.textContent = `✓ Welcome back, ${data.first_name}!`;
                 btn.classList.add('opacity-75');
                 
                 setTimeout(() => {

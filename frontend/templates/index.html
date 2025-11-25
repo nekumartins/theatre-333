@@ -85,31 +85,44 @@
 </div>
 
 <script>
+    // Check if token is valid
+    function isTokenValid(token) {
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            return Date.now() < exp;
+        } catch (e) {
+            return false;
+        }
+    }
+
     // Check if user is logged in and adjust hero section
     const token = localStorage.getItem('access_token');
-    const userEmail = localStorage.getItem('user_email');
     
-    if (token) {
+    if (token && isTokenValid(token)) {
         // User is logged in - hide sign up button and personalize
         const signUpBtn = document.getElementById('signUpBtn');
         if (signUpBtn) {
             signUpBtn.style.display = 'none';
         }
         
-        // Optionally add a "My Bookings" button instead
+        // Add a "My Bookings" button instead
         const heroButtons = document.getElementById('heroButtons');
         const bookingsBtn = document.createElement('a');
         bookingsBtn.href = '/my-bookings';
         bookingsBtn.className = 'px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-all border border-purple-500/20';
         bookingsBtn.textContent = 'My Bookings';
         heroButtons.appendChild(bookingsBtn);
+    } else if (token) {
+        // Clear expired token
+        localStorage.clear();
     }
 
     async function loadShows() {
         try {
-            const response = await fetch('https://api.tvmaze.com/shows');
-            const allShows = await response.json();
-            const shows = allShows.slice(0, 4);
+            const response = await fetch('/api/shows/?status=Active');
+            const shows = await response.json();
             
             const container = document.getElementById('showsContainer');
             container.innerHTML = shows.map(show => {

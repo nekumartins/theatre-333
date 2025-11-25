@@ -14,10 +14,23 @@
 
 {% block scripts %}
 <script>
+    // Check if token is valid
+    function isTokenValid(token) {
+        if (!token) return false;
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            return Date.now() < exp;
+        } catch (e) {
+            return false;
+        }
+    }
+
     // Check authentication
     const token = localStorage.getItem('access_token');
-    if (!token) {
-        alert('Please login to view your bookings');
+    if (!token || !isTokenValid(token)) {
+        localStorage.clear();
+        alert('Your session has expired. Please login again.');
         window.location.href = '/login';
     }
 
