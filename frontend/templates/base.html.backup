@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Theatre Booking System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-indigo-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold hover:text-indigo-200 transition">🎭 Theatre Booking</a>
+            <div class="space-x-6">
+                <a href="/shows" class="hover:text-indigo-200 transition">Browse Shows</a>
+                <a href="/my-bookings" class="hover:text-indigo-200 transition">My Bookings</a>
+                <a href="/login" class="hover:text-indigo-200 transition">Login</a>
+                <a href="/register" class="bg-white text-indigo-600 px-4 py-2 rounded hover:bg-indigo-100 transition">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto mt-8 px-4 min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center p-6 mt-12">
+        <p>&copy; 2025 Theatre Booking System. All rights reserved.</p>
+        <p class="text-sm text-gray-400 mt-2">Academic Project - Systems Analysis and Design</p>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

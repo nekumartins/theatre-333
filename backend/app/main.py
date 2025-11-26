@@ -4,9 +4,10 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from app.routers import users, shows, performances, bookings, payments
-from app.database import get_db, engine
-from app import models
+from pathlib import Path
+from backend.app.routers import users, shows, performances, bookings, payments, profile, admin, verification, analytics
+from backend.app.database import get_db, engine
+from backend.app import models
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -26,11 +27,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Get the project root directory
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+STATIC_DIR = BASE_DIR / "frontend" / "static"
+TEMPLATES_DIR = BASE_DIR / "frontend" / "templates"
+
 # Mount static files
-app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Templates
-templates = Jinja2Templates(directory="../frontend/templates")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 # Include routers
 app.include_router(users.router)
@@ -38,6 +44,10 @@ app.include_router(shows.router)
 app.include_router(performances.router)
 app.include_router(bookings.router)
 app.include_router(payments.router)
+app.include_router(profile.router)
+app.include_router(admin.router)
+app.include_router(verification.router)
+app.include_router(analytics.router)
 
 
 # Frontend routes
@@ -87,6 +97,24 @@ async def login_page(request: Request):
 async def register_page(request: Request):
     """Registration page"""
     return templates.TemplateResponse("register.html", {"request": request})
+
+
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    """User profile page"""
+    return templates.TemplateResponse("profile.html", {"request": request})
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    """Admin panel page"""
+    return templates.TemplateResponse("admin.html", {"request": request})
+
+
+@app.get("/booking/confirmation", response_class=HTMLResponse)
+async def booking_confirmation_page(request: Request):
+    """Booking confirmation page"""
+    return templates.TemplateResponse("booking_confirmation.html", {"request": request})
 
 
 @app.get("/health")

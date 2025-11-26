@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional, List
-from app import models, schemas, database
+from backend.app import models, schemas, database
 
 router = APIRouter(prefix="/api/shows", tags=["Shows"])
 
 
-@router.get("/", response_model=List[schemas.ShowResponse])
+@router.get("/")
 def get_shows(
     genre: Optional[str] = None,
     status: str = "Active",
@@ -19,10 +19,10 @@ def get_shows(
         query = query.join(models.Genre).filter(models.Genre.genre_name == genre)
     
     shows = query.all()
-    return shows
+    return {"shows": shows, "count": len(shows)}
 
 
-@router.get("/{show_id}", response_model=schemas.ShowResponse)
+@router.get("/{show_id}")
 def get_show_detail(show_id: int, db: Session = Depends(database.get_db)):
     """Get detailed information about a specific show"""
     show = db.query(models.Show).filter(models.Show.show_id == show_id).first()
@@ -31,8 +31,8 @@ def get_show_detail(show_id: int, db: Session = Depends(database.get_db)):
     return show
 
 
-@router.get("/genres/", response_model=List[schemas.GenreResponse])
+@router.get("/genres/")
 def get_genres(db: Session = Depends(database.get_db)):
     """Get all available genres"""
     genres = db.query(models.Genre).all()
-    return genres
+    return {"genres": genres, "count": len(genres)}
