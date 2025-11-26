@@ -3,12 +3,16 @@
 {% block title %}Show Details{% endblock %}
 
 {% block content %}
-<div id="show-details" class="max-w-4xl mx-auto">
-    <div class="text-center text-gray-500">Loading show details...</div>
-</div>
+<div class="min-h-screen bg-[#0a0a0f] py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="show-details">
+            <div class="text-center text-gray-500">Loading show details...</div>
+        </div>
 
-<div id="performances-section" class="max-w-4xl mx-auto mt-8">
-    <!-- Performances will load here -->
+        <div id="performances-section" class="mt-8">
+            <!-- Performances will load here -->
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -24,28 +28,63 @@
             const show = await response.json();
             
             document.getElementById('show-details').innerHTML = `
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <img src="${show.poster_url || '/static/images/placeholder.jpg'}" 
-                         alt="${show.title}" 
-                         class="w-full h-64 object-cover">
+                <div class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl border border-purple-500/20 shadow-xl shadow-purple-500/5 overflow-hidden">
+                    ${show.poster_url ? `
+                        <div class="h-80 bg-gradient-to-br from-purple-900/20 to-pink-900/20 relative overflow-hidden">
+                            <img src="${show.poster_url}" 
+                                 alt="${show.title}" 
+                                 class="w-full h-full object-cover opacity-80">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] via-transparent to-transparent"></div>
+                        </div>
+                    ` : ''}
                     <div class="p-8">
-                        <h1 class="text-4xl font-bold mb-4">${show.title}</h1>
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <p class="text-gray-600"><strong>Genre:</strong> ${show.genre ? show.genre.genre_name : 'N/A'}</p>
-                                <p class="text-gray-600"><strong>Duration:</strong> ${show.duration_minutes} minutes</p>
-                                <p class="text-gray-600"><strong>Language:</strong> ${show.language || 'N/A'}</p>
+                        <h1 class="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            ${show.title}
+                        </h1>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">🎭</span>
+                                    <span class="text-gray-400">Genre:</span>
+                                    <span class="text-white font-medium">${show.genre ? show.genre.genre_name : 'N/A'}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">⏱️</span>
+                                    <span class="text-gray-400">Duration:</span>
+                                    <span class="text-white font-medium">${show.duration_minutes} minutes</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">🌍</span>
+                                    <span class="text-gray-400">Language:</span>
+                                    <span class="text-white font-medium">${show.language || 'N/A'}</span>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-gray-600"><strong>Director:</strong> ${show.director || 'N/A'}</p>
-                                <p class="text-gray-600"><strong>Producer:</strong> ${show.producer || 'N/A'}</p>
-                                <p class="text-gray-600"><strong>Age Rating:</strong> ${show.age_rating || 'NR'}</p>
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">🎬</span>
+                                    <span class="text-gray-400">Director:</span>
+                                    <span class="text-white font-medium">${show.director || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">🎞️</span>
+                                    <span class="text-gray-400">Producer:</span>
+                                    <span class="text-white font-medium">${show.producer || 'N/A'}</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-purple-400">📋</span>
+                                    <span class="text-gray-400">Age Rating:</span>
+                                    <span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-sm font-medium">
+                                        ${show.age_rating || 'NR'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-6">
-                            <h3 class="text-xl font-semibold mb-2">Description</h3>
-                            <p class="text-gray-700">${show.description || 'No description available.'}</p>
-                        </div>
+                        ${show.description ? `
+                            <div class="mb-6 p-6 bg-[#0a0a0f] rounded-lg border border-purple-500/10">
+                                <h3 class="text-xl font-semibold mb-3 text-white">Description</h3>
+                                <p class="text-gray-300 leading-relaxed">${show.description}</p>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -66,31 +105,102 @@
             const container = document.getElementById('performances-section');
             if (performances.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-white rounded-lg shadow-md p-8 text-center">
-                        <p class="text-gray-500">No upcoming performances scheduled.</p>
+                    <div class="bg-[#12121a] rounded-lg border border-purple-500/20 shadow-lg p-8 text-center">
+                        <p class="text-gray-400">No upcoming performances scheduled.</p>
                     </div>
                 `;
                 return;
             }
             
+            // Group performances by venue
+            const performancesByVenue = performances.reduce((acc, perf) => {
+                const venueName = perf.venue?.venue_name || 'Unknown Venue';
+                if (!acc[venueName]) {
+                    acc[venueName] = {
+                        venue: perf.venue,
+                        performances: []
+                    };
+                }
+                acc[venueName].performances.push(perf);
+                return acc;
+            }, {});
+            
             container.innerHTML = `
-                <div class="bg-white rounded-lg shadow-md p-8">
-                    <h2 class="text-2xl font-bold mb-6">Upcoming Performances</h2>
-                    <div class="space-y-4">
-                        ${performances.map(perf => `
-                            <div class="border-b pb-4 flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold">${new Date(perf.performance_date).toLocaleDateString()}</p>
-                                    <p class="text-gray-600">Time: ${perf.start_time}</p>
-                                    <p class="text-sm text-gray-500">Venue: ${perf.venue ? perf.venue.venue_name : 'N/A'}</p>
-                                    <p class="text-sm ${perf.available_seats > 0 ? 'text-green-600' : 'text-red-600'}">
-                                        ${perf.available_seats} seats available
-                                    </p>
+                <div class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl border border-purple-500/20 shadow-xl shadow-purple-500/5 p-8">
+                    <h2 class="text-3xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        Upcoming Performances
+                    </h2>
+                    <div class="space-y-8">
+                        ${Object.entries(performancesByVenue).map(([venueName, data]) => `
+                            <div class="bg-[#0a0a0f] rounded-lg border border-purple-500/10 p-6">
+                                <div class="mb-6">
+                                    <h3 class="text-2xl font-semibold text-white mb-3">📍 ${venueName}</h3>
+                                    ${data.venue ? `
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div class="text-gray-400">
+                                                <p class="text-sm">
+                                                    ${data.venue.address_line1}${data.venue.address_line2 ? ', ' + data.venue.address_line2 : ''}
+                                                </p>
+                                                <p class="text-sm">${data.venue.city}, ${data.venue.country}</p>
+                                                ${data.venue.phone ? `<p class="text-sm mt-1">📞 ${data.venue.phone}</p>` : ''}
+                                            </div>
+                                            <div class="text-sm">
+                                                <p class="text-gray-400 mb-2">
+                                                    <span class="text-purple-400">Capacity:</span> 
+                                                    ${data.venue.total_capacity} seats
+                                                </p>
+                                                ${data.venue.facilities ? `
+                                                    <div>
+                                                        <p class="text-gray-400 mb-2">Facilities:</p>
+                                                        <div class="flex flex-wrap gap-2">
+                                                            ${data.venue.facilities.split(',').map(f => `
+                                                                <span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">
+                                                                    ${f.trim()}
+                                                                </span>
+                                                            `).join('')}
+                                                        </div>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
-                                <a href="/performance/${perf.performance_id}/seats" 
-                                   class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 ${perf.available_seats === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
-                                    ${perf.available_seats > 0 ? 'Book Now' : 'Sold Out'}
-                                </a>
+                                <div class="space-y-3">
+                                    ${data.performances.map(perf => `
+                                        <div class="flex flex-col md:flex-row md:justify-between md:items-center p-4 bg-[#12121a] rounded-lg border border-purple-500/10 hover:border-purple-500/30 transition-all">
+                                            <div class="mb-3 md:mb-0">
+                                                <p class="text-white font-semibold text-lg">
+                                                    📅 ${new Date(perf.performance_date).toLocaleDateString('en-US', { 
+                                                        weekday: 'long', 
+                                                        year: 'numeric', 
+                                                        month: 'long', 
+                                                        day: 'numeric' 
+                                                    })}
+                                                </p>
+                                                <p class="text-gray-400 mt-1">
+                                                    🕐 ${perf.start_time}${perf.end_time ? ' - ' + perf.end_time : ''}
+                                                </p>
+                                                <div class="mt-2 flex items-center space-x-2">
+                                                    <span class="px-2 py-1 rounded text-xs ${perf.available_seats > 20 ? 'bg-green-500/20 text-green-500' : perf.available_seats > 0 ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'}">
+                                                        ${perf.available_seats > 0 ? `${perf.available_seats} seats available` : 'Sold Out'}
+                                                    </span>
+                                                    ${perf.performance_status ? `
+                                                        <span class="px-2 py-1 bg-blue-500/20 text-blue-500 rounded text-xs">
+                                                            ${perf.performance_status}
+                                                        </span>
+                                                    ` : ''}
+                                                </div>
+                                                ${perf.special_notes ? `
+                                                    <p class="text-gray-500 text-sm mt-2 italic">ℹ️ ${perf.special_notes}</p>
+                                                ` : ''}
+                                            </div>
+                                            <a href="/performance/${perf.performance_id}/seats" 
+                                               class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg shadow-purple-500/20 text-center ${perf.available_seats === 0 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}">
+                                                ${perf.available_seats > 0 ? 'Book Seats' : 'Sold Out'}
+                                            </a>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         `).join('')}
                     </div>

@@ -82,6 +82,7 @@
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('user_email', email);
                 localStorage.setItem('user_first_name', data.first_name);
+                localStorage.setItem('is_admin', data.is_admin || false);
                 
                 // Show success message briefly then redirect
                 const btn = document.querySelector('button[type="submit"]');

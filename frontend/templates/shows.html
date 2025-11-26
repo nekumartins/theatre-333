@@ -3,30 +3,98 @@
 {% block title %}Browse Shows{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Available Shows</h1>
+<div class="min-h-screen bg-[#0a0a0f] py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-5xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Browse Shows
+        </h1>
 
-    <!-- Filter Section -->
-    <div class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-lg border border-purple-500/20 p-6 mb-8">
-        <div class="flex gap-4">
-            <select id="genre-filter" class="flex-1 bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-3 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
-                <option value="">All Genres</option>
-            </select>
-            <button onclick="loadShows()" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50">
-                Apply Filter
-            </button>
+        <!-- Advanced Filter Section -->
+        <div class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl border border-purple-500/20 shadow-xl shadow-purple-500/5 p-6 mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-white">Filters</h2>
+                <button onclick="clearFilters()" class="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                    Clear All
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Genre Filter -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Genre</label>
+                    <select id="genre-filter" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                        <option value="">All Genres</option>
+                    </select>
+                </div>
+
+                <!-- Venue Filter -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Venue</label>
+                    <select id="venue-filter" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                        <option value="">All Venues</option>
+                    </select>
+                </div>
+
+                <!-- Date Range Filter -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">From Date</label>
+                    <input type="date" id="date-from" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">To Date</label>
+                    <input type="date" id="date-to" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                </div>
+
+                <!-- Price Range Filter -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Min Price ($)</label>
+                    <input type="number" id="price-min" placeholder="0" min="0" step="10" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Max Price ($)</label>
+                    <input type="number" id="price-max" placeholder="1000" min="0" step="10" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                </div>
+
+                <!-- Show Status Filter -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Show Status</label>
+                    <select id="status-filter" class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                        <option value="Active">Active Shows Only</option>
+                        <option value="All">All Shows</option>
+                        <option value="Inactive">Inactive Shows</option>
+                    </select>
+                </div>
+
+                <!-- Search Box -->
+                <div>
+                    <label class="block text-gray-400 text-sm mb-2">Search</label>
+                    <input type="text" id="search-box" placeholder="Search shows..." class="w-full bg-[#0a0a0f] border border-purple-500/30 rounded-lg px-4 py-2.5 text-gray-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20">
+                </div>
+            </div>
+            <div class="mt-6 flex gap-4">
+                <button onclick="loadShows()" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50">
+                    Apply Filters
+                </button>
+            </div>
         </div>
-    </div>
 
-    <!-- Shows Grid -->
-    <div id="shows-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="col-span-3 text-center text-gray-400">Loading shows...</div>
+        <!-- Results Count -->
+        <div id="results-count" class="mb-4 text-gray-400"></div>
+
+        <!-- Shows Grid -->
+        <div id="shows-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center text-gray-400">Loading shows...</div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+    let allShows = [];
+    let allPerformances = [];
+
     async function loadGenres() {
         try {
             const response = await fetch('/api/shows/genres/');
@@ -43,48 +111,216 @@
         }
     }
 
+    async function loadVenues() {
+        try {
+            const response = await fetch('/api/shows/venues/');
+            const venues = await response.json();
+            const select = document.getElementById('venue-filter');
+            venues.forEach(venue => {
+                const option = document.createElement('option');
+                option.value = venue.venue_id;
+                option.textContent = venue.venue_name;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading venues:', error);
+        }
+    }
+
+    async function loadAllPerformances() {
+        try {
+            const response = await fetch('/api/performances/');
+            allPerformances = await response.json();
+        } catch (error) {
+            console.error('Error loading performances:', error);
+        }
+    }
+
     async function loadShows() {
         try {
             const genre = document.getElementById('genre-filter').value;
-            let url = '/api/shows/?status=Active';
+            const venueId = document.getElementById('venue-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+            const priceMin = document.getElementById('price-min').value;
+            const priceMax = document.getElementById('price-max').value;
+            const status = document.getElementById('status-filter').value;
+            const searchText = document.getElementById('search-box').value.toLowerCase();
+            
+            let url = `/api/shows/?status=${status}`;
             if (genre) {
                 url += `&genre=${genre}`;
             }
             
             const response = await fetch(url);
-            const shows = await response.json();
+            allShows = await response.json();
             
-            const container = document.getElementById('shows-container');
-            if (shows.length === 0) {
-                container.innerHTML = '<p class="col-span-3 text-center text-gray-400">No shows found.</p>';
-                return;
+            // Apply additional filters
+            let filteredShows = allShows;
+
+            // Search filter
+            if (searchText) {
+                filteredShows = filteredShows.filter(show => 
+                    show.title.toLowerCase().includes(searchText) ||
+                    (show.description && show.description.toLowerCase().includes(searchText)) ||
+                    (show.director && show.director.toLowerCase().includes(searchText)) ||
+                    (show.producer && show.producer.toLowerCase().includes(searchText))
+                );
+            }
+
+            // Venue filter (filter shows that have performances at selected venue)
+            if (venueId) {
+                const showIdsAtVenue = new Set(
+                    allPerformances
+                        .filter(p => p.venue_id === parseInt(venueId))
+                        .map(p => p.show_id)
+                );
+                filteredShows = filteredShows.filter(show => showIdsAtVenue.has(show.show_id));
+            }
+
+            // Date filter (filter shows with performances in date range)
+            if (dateFrom || dateTo) {
+                const showIdsInRange = new Set(
+                    allPerformances
+                        .filter(p => {
+                            const perfDate = new Date(p.performance_date);
+                            const from = dateFrom ? new Date(dateFrom) : new Date('1900-01-01');
+                            const to = dateTo ? new Date(dateTo) : new Date('2100-12-31');
+                            return perfDate >= from && perfDate <= to;
+                        })
+                        .map(p => p.show_id)
+                );
+                filteredShows = filteredShows.filter(show => showIdsInRange.has(show.show_id));
+            }
+
+            // Price filter (filter shows with performances in price range)
+            if (priceMin || priceMax) {
+                const min = priceMin ? parseFloat(priceMin) : 0;
+                const max = priceMax ? parseFloat(priceMax) : Infinity;
+                
+                // Get all performance pricing
+                const pricingResponse = await fetch('/api/performances/pricing/all');
+                let pricing = [];
+                if (pricingResponse.ok) {
+                    pricing = await pricingResponse.json();
+                }
+                
+                const showIdsInPriceRange = new Set(
+                    pricing
+                        .filter(p => {
+                            const price = parseFloat(p.price);
+                            return price >= min && price <= max;
+                        })
+                        .map(p => {
+                            const perf = allPerformances.find(perf => perf.performance_id === p.performance_id);
+                            return perf ? perf.show_id : null;
+                        })
+                        .filter(id => id !== null)
+                );
+                
+                if (showIdsInPriceRange.size > 0) {
+                    filteredShows = filteredShows.filter(show => showIdsInPriceRange.has(show.show_id));
+                } else if (priceMin || priceMax) {
+                    // If no performances match price range, show no results
+                    filteredShows = [];
+                }
             }
             
-            container.innerHTML = shows.map(show => `
+            displayShows(filteredShows);
+        } catch (error) {
+            console.error('Error loading shows:', error);
+            document.getElementById('shows-container').innerHTML = 
+                '<p class="col-span-full text-center text-pink-400">Error loading shows.</p>';
+        }
+    }
+
+    function displayShows(shows) {
+        const container = document.getElementById('shows-container');
+        const resultsCount = document.getElementById('results-count');
+        
+        resultsCount.textContent = `Showing ${shows.length} show${shows.length !== 1 ? 's' : ''}`;
+        
+        if (shows.length === 0) {
+            container.innerHTML = '<p class="col-span-full text-center text-gray-400">No shows found matching your criteria.</p>';
+            return;
+        }
+        
+        container.innerHTML = shows.map(show => {
+            // Get performances for this show
+            const showPerformances = allPerformances.filter(p => p.show_id === show.show_id);
+            const upcomingPerformances = showPerformances.filter(p => new Date(p.performance_date) >= new Date());
+            
+            return `
                 <div class="group bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl overflow-hidden border border-purple-500/20 hover:border-purple-500/40 transition-all hover:shadow-xl hover:shadow-purple-500/10">
-                    <div class="h-56 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-6xl relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] to-transparent opacity-60"></div>
-                        <span class="relative z-10">🎭</span>
-                    </div>
+                    ${show.poster_url ? `
+                        <div class="h-56 relative overflow-hidden">
+                            <img src="${show.poster_url}" alt="${show.title}" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] via-transparent to-transparent"></div>
+                        </div>
+                    ` : `
+                        <div class="h-56 bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-6xl relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#12121a] to-transparent opacity-60"></div>
+                            <span class="relative z-10">🎭</span>
+                        </div>
+                    `}
                     <div class="p-6">
-                        <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">${show.title}</h2>
-                        <p class="text-purple-400 text-sm font-medium mb-2">${show.genre ? show.genre.genre_name : 'N/A'}</p>
-                        <p class="text-sm text-gray-400 mb-4">${show.duration_minutes} minutes • ${show.age_rating || 'NR'}</p>
+                        <h2 class="text-2xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors truncate">${show.title}</h2>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-purple-400 text-sm font-medium">${show.genre_name || 'N/A'}</p>
+                            ${show.show_status === 'Active' ? 
+                                '<span class="px-2 py-1 bg-green-500/20 text-green-500 rounded text-xs">Active</span>' : 
+                                '<span class="px-2 py-1 bg-gray-500/20 text-gray-500 rounded text-xs">Inactive</span>'
+                            }
+                        </div>
+                        <p class="text-sm text-gray-400 mb-3">${show.duration_minutes} min • ${show.age_rating || 'NR'}</p>
+                        ${show.director ? `<p class="text-xs text-gray-500 mb-3">Director: ${show.director}</p>` : ''}
+                        ${upcomingPerformances.length > 0 ? `
+                            <p class="text-xs text-purple-400 mb-4">
+                                📅 ${upcomingPerformances.length} upcoming performance${upcomingPerformances.length !== 1 ? 's' : ''}
+                            </p>
+                        ` : ''}
                         <a href="/shows/${show.show_id}" 
-                           class="inline-block px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/20">
+                           class="block text-center px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40">
                             View Details & Book
                         </a>
                     </div>
                 </div>
-            `).join('');
-        } catch (error) {
-            console.error('Error loading shows:', error);
-            document.getElementById('shows-container').innerHTML = 
-                '<p class="col-span-3 text-center text-pink-400">Error loading shows.</p>';
-        }
+            `;
+        }).join('');
+    }
+
+    function clearFilters() {
+        document.getElementById('genre-filter').value = '';
+        document.getElementById('venue-filter').value = '';
+        document.getElementById('date-from').value = '';
+        document.getElementById('date-to').value = '';
+        document.getElementById('price-min').value = '';
+        document.getElementById('price-max').value = '';
+        document.getElementById('status-filter').value = 'Active';
+        document.getElementById('search-box').value = '';
+        loadShows();
+    }
+
+    // Set default date from to today
+    document.getElementById('date-from').value = new Date().toISOString().split('T')[0];
+    
+    // Initialize
+    async function init() {
+        await Promise.all([
+            loadGenres(),
+            loadVenues(),
+            loadAllPerformances()
+        ]);
+        loadShows();
     }
     
-    loadGenres();
-    loadShows();
+    init();
+
+    // Add real-time search
+    let searchTimeout;
+    document.getElementById('search-box').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadShows, 300);
+    });
 </script>
 {% endblock %}

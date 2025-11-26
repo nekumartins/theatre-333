@@ -48,14 +48,16 @@ def login(credentials: schemas.UserLogin, db: Session = Depends(database.get_db)
         "sub": user.email, 
         "user_id": user.user_id,
         "first_name": user.first_name,
-        "last_name": user.last_name
+        "last_name": user.last_name,
+        "is_admin": user.is_admin if hasattr(user, 'is_admin') else False
     })
     
     return {
         "access_token": access_token, 
         "token_type": "bearer",
         "first_name": user.first_name,
-        "last_name": user.last_name
+        "last_name": user.last_name,
+        "is_admin": user.is_admin if hasattr(user, 'is_admin') else False
     }
 
 

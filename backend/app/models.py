@@ -32,6 +32,7 @@ class User(Base):
     registration_date = Column(Date, nullable=False)
     email_verified = Column(Boolean, default=False)
     account_status = Column(String(20), default="Active")
+    is_admin = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     

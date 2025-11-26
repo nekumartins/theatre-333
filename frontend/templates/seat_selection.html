@@ -3,53 +3,82 @@
 {% block title %}Select Seats{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
-    <div id="performance-info" class="mb-6">
-        <div class="text-gray-500">Loading performance details...</div>
-    </div>
-
-    <div class="bg-white p-8 rounded-lg shadow-lg">
-        <h2 class="text-3xl font-semibold mb-6 text-center">Select Your Seats</h2>
-        
-        <!-- Stage -->
-        <div class="bg-gray-300 text-center py-4 mb-8 rounded">
-            <p class="text-gray-700 font-semibold">🎭 STAGE 🎭</p>
-        </div>
-        
-        <!-- Seat Map -->
-        <div id="seat-map" class="mb-8">
-            <div class="text-center text-gray-500">Loading seats...</div>
+<div class="min-h-screen bg-[#0a0a0f] py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="performance-info" class="mb-6">
+            <div class="text-gray-500">Loading performance details...</div>
         </div>
 
-        <!-- Legend -->
-        <div class="flex justify-center space-x-8 mb-8">
-            <div class="flex items-center">
-                <div class="w-8 h-8 bg-green-100 border border-green-400 mr-2 rounded"></div>
-                <span>Available</span>
+        <div class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] p-8 rounded-xl border border-purple-500/20 shadow-xl shadow-purple-500/5">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-semibold text-white">Select Your Seats</h2>
+                
+                <!-- Accessibility Filter -->
+                <div class="flex items-center space-x-3">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" id="accessibility-filter" class="mr-2 w-5 h-5 rounded border-purple-500/30 bg-[#0a0a0f] text-purple-500 focus:ring-2 focus:ring-purple-500/20">
+                        <span class="text-gray-300 flex items-center">
+                            <span class="mr-1">♿</span>
+                            Show Accessible Seats Only
+                        </span>
+                    </label>
+                </div>
             </div>
-            <div class="flex items-center">
-                <div class="w-8 h-8 bg-gray-300 border border-gray-400 mr-2 rounded"></div>
-                <span>Booked</span>
+            
+            <!-- Stage -->
+            <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-center py-6 mb-8 rounded-lg border border-purple-500/30">
+                <p class="text-white font-semibold text-lg">🎭 STAGE 🎭</p>
             </div>
-            <div class="flex items-center">
-                <div class="w-8 h-8 bg-blue-200 border border-blue-400 mr-2 rounded"></div>
-                <span>Selected</span>
+            
+            <!-- Seat Map -->
+            <div id="seat-map" class="mb-8">
+                <div class="text-center text-gray-500">Loading seats...</div>
             </div>
-        </div>
 
-        <!-- Summary -->
-        <div class="bg-gray-100 p-6 rounded-lg mb-6">
-            <h3 class="text-xl font-semibold mb-4">Booking Summary</h3>
-            <p class="mb-2">Selected Seats: <span id="selected-seats-text" class="font-semibold">None</span></p>
-            <p class="text-2xl font-bold text-indigo-600">Total: $<span id="total-price">0.00</span></p>
-        </div>
+            <!-- Legend -->
+            <div class="flex flex-wrap justify-center gap-6 mb-8 p-4 bg-[#0a0a0f] rounded-lg border border-purple-500/10">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-500/20 border-2 border-green-500 mr-2 rounded flex items-center justify-center">
+                        <span class="text-xs text-green-500">1</span>
+                    </div>
+                    <span class="text-gray-300">Available</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-600/30 border-2 border-gray-500 mr-2 rounded flex items-center justify-center cursor-not-allowed">
+                        <span class="text-xs text-gray-500">1</span>
+                    </div>
+                    <span class="text-gray-300">Booked</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-500/30 border-2 border-blue-400 mr-2 rounded flex items-center justify-center">
+                        <span class="text-xs text-blue-400">1</span>
+                    </div>
+                    <span class="text-gray-300">Selected</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-500/20 border-2 border-purple-400 mr-2 rounded flex items-center justify-center">
+                        <span class="text-lg">♿</span>
+                    </div>
+                    <span class="text-gray-300">Wheelchair Accessible</span>
+                </div>
+            </div>
 
-        <div class="text-center">
-            <button id="book-btn" 
-                    class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed" 
-                    disabled>
-                Proceed to Booking
-            </button>
+            <!-- Summary -->
+            <div class="bg-[#0a0a0f] p-6 rounded-lg mb-6 border border-purple-500/20">
+                <h3 class="text-xl font-semibold mb-4 text-white">Booking Summary</h3>
+                <p class="mb-2 text-gray-300">Selected Seats: <span id="selected-seats-text" class="font-semibold text-purple-400">None</span></p>
+                <p class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Total: $<span id="total-price">0.00</span>
+                </p>
+            </div>
+
+            <div class="text-center">
+                <button id="book-btn" 
+                        class="px-8 py-3 rounded-lg text-lg font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-purple-500/30" 
+                        disabled>
+                    Proceed to Booking
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -57,11 +86,12 @@
 
 {% block scripts %}
 <script>
-    // Get performance ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const performanceId = parseInt(urlParams.get('performance_id'));
+    // Get performance ID from URL path
+    const pathParts = window.location.pathname.split('/');
+    const performanceId = parseInt(pathParts[2]);
     let selectedSeats = [];
     let seatData = [];
+    let showAccessibleOnly = false;
     
     async function loadPerformanceInfo() {
         try {
@@ -69,10 +99,18 @@
             const perf = await response.json();
             
             document.getElementById('performance-info').innerHTML = `
-                <h1 class="text-3xl font-bold mb-2">${perf.show ? perf.show.title : 'Performance'}</h1>
-                <p class="text-gray-600 text-lg">
-                    ${new Date(perf.performance_date).toLocaleDateString()} at ${perf.start_time}
-                    | ${perf.venue ? perf.venue.venue_name : ''}
+                <h1 class="text-4xl font-bold mb-3 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    ${perf.show ? perf.show.title : 'Performance'}
+                </h1>
+                <p class="text-gray-400 text-lg">
+                    📅 ${new Date(perf.performance_date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })} at ${perf.start_time}
+                    <br>
+                    📍 ${perf.venue ? perf.venue.venue_name : ''}
                 </p>
             `;
         } catch (error) {
@@ -95,27 +133,53 @@
     }
     
     function renderSeatMap(seats) {
+        // Filter by accessibility if needed
+        let filteredSeats = seats;
+        if (showAccessibleOnly) {
+            filteredSeats = seats.filter(s => s.is_accessible);
+        }
+
+        if (filteredSeats.length === 0) {
+            document.getElementById('seat-map').innerHTML = 
+                '<p class="text-gray-400 text-center">No seats match the current filter.</p>';
+            return;
+        }
+
         const rows = {};
-        seats.forEach(seat => {
+        filteredSeats.forEach(seat => {
             if (!rows[seat.row]) rows[seat.row] = [];
             rows[seat.row].push(seat);
         });
         
         const html = Object.keys(rows).sort().map(row => `
-            <div class="flex justify-center items-center mb-2">
-                <span class="w-8 text-center font-semibold text-gray-600">${row}</span>
-                <div class="flex gap-2">
-                    ${rows[row].map(seat => `
-                        <div class="seat w-10 h-10 border rounded cursor-pointer flex items-center justify-center text-xs font-semibold
-                                    ${seat.is_booked ? 'bg-gray-300 border-gray-400 cursor-not-allowed' : 'bg-green-100 border-green-400 hover:bg-green-200'}"
-                             data-seat-id="${seat.seat_id}"
-                             data-price="${seat.price}"
-                             data-row="${seat.row}"
-                             data-number="${seat.number}"
-                             ${seat.is_booked ? 'data-booked="true"' : ''}>
-                            ${seat.number}
-                        </div>
-                    `).join('')}
+            <div class="flex justify-center items-center mb-3">
+                <span class="w-12 text-center font-semibold text-purple-400">${row}</span>
+                <div class="flex gap-2 flex-wrap justify-center">
+                    ${rows[row].map(seat => {
+                        const isBooked = seat.is_booked;
+                        const isAccessible = seat.is_accessible;
+                        const baseClasses = 'seat w-12 h-12 border-2 rounded flex items-center justify-center text-xs font-semibold relative transition-all';
+                        const bookedClasses = 'bg-gray-600/30 border-gray-500 cursor-not-allowed';
+                        const availableClasses = 'bg-green-500/20 border-green-500 hover:bg-green-500/30 cursor-pointer';
+                        
+                        return `
+                            <div class="${baseClasses} ${isBooked ? bookedClasses : availableClasses}"
+                                 data-seat-id="${seat.seat_id}"
+                                 data-price="${seat.price}"
+                                 data-row="${seat.row}"
+                                 data-number="${seat.number}"
+                                 data-accessible="${isAccessible}"
+                                 ${isBooked ? 'data-booked="true"' : ''}
+                                 title="${isAccessible ? 'Wheelchair Accessible Seat' : 'Standard Seat'} - $${seat.price}">
+                                ${isAccessible ? `
+                                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">
+                                        ♿
+                                    </div>
+                                ` : ''}
+                                <span class="${isBooked ? 'text-gray-500' : 'text-green-400'}">${seat.number}</span>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             </div>
         `).join('');
@@ -131,17 +195,22 @@
                 const price = parseFloat(this.dataset.price);
                 const row = this.dataset.row;
                 const number = this.dataset.number;
+                const isAccessible = this.dataset.accessible === 'true';
 
-                if (this.classList.contains('bg-blue-200')) {
+                if (this.classList.contains('bg-blue-500/30')) {
                     // Deselect
-                    this.classList.remove('bg-blue-200', 'border-blue-400');
-                    this.classList.add('bg-green-100', 'border-green-400');
+                    this.classList.remove('bg-blue-500/30', 'border-blue-400');
+                    this.classList.add('bg-green-500/20', 'border-green-500');
+                    this.querySelector('span').classList.remove('text-blue-400');
+                    this.querySelector('span').classList.add('text-green-400');
                     selectedSeats = selectedSeats.filter(s => s.id !== seatId);
                 } else {
                     // Select
-                    this.classList.remove('bg-green-100', 'border-green-400');
-                    this.classList.add('bg-blue-200', 'border-blue-400');
-                    selectedSeats.push({id: seatId, price, row, number});
+                    this.classList.remove('bg-green-500/20', 'border-green-500');
+                    this.classList.add('bg-blue-500/30', 'border-blue-400');
+                    this.querySelector('span').classList.remove('text-green-400');
+                    this.querySelector('span').classList.add('text-blue-400');
+                    selectedSeats.push({id: seatId, price, row, number, isAccessible});
                 }
 
                 updateSummary();
@@ -152,22 +221,43 @@
     function updateSummary() {
         const total = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
         const seatText = selectedSeats.length > 0 
-            ? selectedSeats.map(s => `${s.row}${s.number}`).join(', ')
+            ? selectedSeats.map(s => `${s.row}${s.number}${s.isAccessible ? ' ♿' : ''}`).join(', ')
             : 'None';
         
         document.getElementById('selected-seats-text').textContent = seatText;
         document.getElementById('total-price').textContent = total.toFixed(2);
         document.getElementById('book-btn').disabled = selectedSeats.length === 0;
     }
+
+    // Accessibility filter toggle
+    document.getElementById('accessibility-filter').addEventListener('change', function() {
+        showAccessibleOnly = this.checked;
+        // Clear selections when filter changes
+        selectedSeats = [];
+        updateSummary();
+        renderSeatMap(seatData);
+    });
     
     document.getElementById('book-btn').addEventListener('click', async function() {
-        // For demo, using user_id = 1 (should come from authentication)
-        const userId = localStorage.getItem('user_id') || 1;
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) {
+            alert('Please login to book seats');
+            window.location.href = '/login';
+            return;
+        }
+
+        // Get user_id from token
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userId = payload.user_id;
         
         try {
             const response = await fetch('/api/bookings/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     user_id: parseInt(userId),
                     performance_id: performanceId,

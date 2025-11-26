@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from app.routers import users, shows, performances, bookings, payments
+from app.routers import users, shows, performances, bookings, payments, profile, admin
 from app.database import get_db, engine
 from app import models
 
@@ -38,6 +38,8 @@ app.include_router(shows.router)
 app.include_router(performances.router)
 app.include_router(bookings.router)
 app.include_router(payments.router)
+app.include_router(profile.router)
+app.include_router(admin.router)
 
 
 # Frontend routes
@@ -87,6 +89,18 @@ async def login_page(request: Request):
 async def register_page(request: Request):
     """Registration page"""
     return templates.TemplateResponse("register.html", {"request": request})
+
+
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    """User profile page"""
+    return templates.TemplateResponse("profile.html", {"request": request})
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page(request: Request):
+    """Admin panel page"""
+    return templates.TemplateResponse("admin.html", {"request": request})
 
 
 @app.get("/health")
