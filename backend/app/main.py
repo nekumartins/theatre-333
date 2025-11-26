@@ -1,13 +1,14 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Cookie
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pathlib import Path
+from typing import Optional
 from app.routers import users, shows, performances, bookings, payments, profile, admin, verification, analytics
 from app.database import get_db, engine
-from app import models
+from app import models, auth
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -71,19 +72,25 @@ async def show_detail_page(request: Request, show_id: int):
 
 @app.get("/performance/{performance_id}/seats", response_class=HTMLResponse)
 async def seat_selection_page(request: Request, performance_id: int):
-    """Seat selection page"""
+    """Seat selection page (requires login)"""
+    # Check if user is logged in via localStorage (JavaScript handles this)
+    # API endpoints are protected, this is just the page
     return templates.TemplateResponse("seat_selection.html", {"request": request, "performance_id": performance_id})
 
 
 @app.get("/booking/{booking_id}/payment", response_class=HTMLResponse)
 async def payment_page(request: Request, booking_id: int):
-    """Payment page"""
+    """Payment page (requires login)"""
+    # Check if user is logged in via localStorage (JavaScript handles this)
+    # API endpoints are protected, this is just the page
     return templates.TemplateResponse("payment.html", {"request": request, "booking_id": booking_id})
 
 
 @app.get("/my-bookings", response_class=HTMLResponse)
 async def my_bookings_page(request: Request):
-    """User bookings page"""
+    """User bookings page (requires login)"""
+    # Check if user is logged in via localStorage (JavaScript handles this)
+    # API endpoints are protected, this is just the page
     return templates.TemplateResponse("my_bookings.html", {"request": request})
 
 
@@ -101,13 +108,17 @@ async def register_page(request: Request):
 
 @app.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request):
-    """User profile page"""
+    """User profile page (requires login)"""
+    # Check if user is logged in via localStorage (JavaScript handles this)
+    # API endpoints are protected, this is just the page
     return templates.TemplateResponse("profile.html", {"request": request})
 
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
-    """Admin panel page"""
+    """Admin panel page (requires admin login)"""
+    # Check if user is logged in and is admin via localStorage (JavaScript handles this)
+    # API endpoints are protected, this is just the page
     return templates.TemplateResponse("admin.html", {"request": request})
 
 

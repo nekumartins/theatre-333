@@ -382,7 +382,7 @@
 <script>
     // Check admin access
     function checkAdminAccess() {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         const isAdmin = localStorage.getItem('is_admin') === 'true';
         
         if (!token || !isTokenValid(token)) {
