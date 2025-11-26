@@ -3,10 +3,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Load .env from backend directory
+backend_dir = Path(__file__).resolve().parent.parent
+load_dotenv(backend_dir / ".env")
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:password@localhost:3306/theatre_booking")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./theatre_booking.db")
 
 engine = create_engine(
     DATABASE_URL,

@@ -1,19 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import date
-from app import models, schemas, database, auth
+from backend.app import models, schemas, database, auth
 
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 
 
 @router.get("/me")
-def get_profile(token: str, db: Session = Depends(database.get_db)):
+def get_profile(current_user: dict = Depends(auth.get_current_user_from_token), db: Session = Depends(database.get_db)):
     """Get current user's profile"""
-    payload = auth.decode_access_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
-    user = db.query(models.User).filter(models.User.email == payload.get("sub")).first()
+    user = db.query(models.User).filter(models.User.email == current_user.get("sub")).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
@@ -36,13 +32,9 @@ def get_profile(token: str, db: Session = Depends(database.get_db)):
 
 
 @router.put("/update")
-def update_profile(profile_data: dict, token: str, db: Session = Depends(database.get_db)):
+def update_profile(profile_data: dict, current_user: dict = Depends(auth.get_current_user_from_token), db: Session = Depends(database.get_db)):
     """Update user profile"""
-    payload = auth.decode_access_token(token)
-    if not payload:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    
-    user = db.query(models.User).filter(models.User.email == payload.get("sub")).first()
+    user = db.query(models.User).filter(models.User.email == current_user.get("sub")).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     

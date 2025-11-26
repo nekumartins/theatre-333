@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import date, time
-from app import models, database, auth
+from backend.app import models, database, auth
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
@@ -91,6 +91,44 @@ class PerformancePricingCreate(BaseModel):
 
 class PerformancePricingUpdate(BaseModel):
     price: float
+
+
+class GenreCreate(BaseModel):
+    genre_name: str
+    description: str | None = None
+
+
+# ===== GENRE MANAGEMENT =====
+
+@router.post("/genres", status_code=status.HTTP_201_CREATED)
+def create_genre(
+    genre: GenreCreate,
+    db: Session = Depends(database.get_db),
+    admin: dict = Depends(auth.verify_admin)
+):
+    """Create a new genre (Admin only)"""
+    # Check if genre already exists
+    existing = db.query(models.Genre).filter(models.Genre.genre_name == genre.genre_name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Genre already exists")
+    
+    new_genre = models.Genre(
+        genre_name=genre.genre_name,
+        description=genre.description
+    )
+    
+    db.add(new_genre)
+    db.commit()
+    db.refresh(new_genre)
+    
+    return {"genre_id": new_genre.genre_id, "message": "Genre created successfully"}
+
+
+@router.get("/genres")
+def list_genres(db: Session = Depends(database.get_db)):
+    """List all genres"""
+    genres = db.query(models.Genre).all()
+    return {"genres": [{"genre_id": g.genre_id, "genre_name": g.genre_name, "description": g.description} for g in genres]}
 
 
 # ===== SHOW MANAGEMENT =====

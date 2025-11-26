@@ -4,9 +4,10 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from app.routers import users, shows, performances, bookings, payments, profile, admin, verification, analytics
-from app.database import get_db, engine
-from app import models
+from pathlib import Path
+from backend.app.routers import users, shows, performances, bookings, payments, profile, admin, verification, analytics
+from backend.app.database import get_db, engine
+from backend.app import models
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -26,11 +27,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Get the project root directory
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+STATIC_DIR = BASE_DIR / "frontend" / "static"
+TEMPLATES_DIR = BASE_DIR / "frontend" / "templates"
+
 # Mount static files
-app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Templates
-templates = Jinja2Templates(directory="../frontend/templates")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 # Include routers
 app.include_router(users.router)

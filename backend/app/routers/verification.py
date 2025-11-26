@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app import models, database
+from backend.app import models, database
 
 router = APIRouter(prefix="/api/verification", tags=["Email Verification"])
 
@@ -15,10 +15,15 @@ def generate_verification_token():
     return secrets.token_urlsafe(32)
 
 
+from pydantic import BaseModel
+
+class EmailRequest(BaseModel):
+    email: str
+
 @router.post("/send-verification")
-def send_verification_email(email: str, db: Session = Depends(database.get_db)):
+def send_verification_email(request: EmailRequest, db: Session = Depends(database.get_db)):
     """Send verification email to user"""
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(models.User).filter(models.User.email == request.email).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -29,7 +34,7 @@ def send_verification_email(email: str, db: Session = Depends(database.get_db)):
     # Generate token
     token = generate_verification_token()
     verification_tokens[token] = {
-        "email": email,
+        "email": request.email,
         "expires": datetime.now() + timedelta(hours=24)
     }
     
@@ -96,9 +101,9 @@ def get_verification_status(email: str, db: Session = Depends(database.get_db)):
 
 
 @router.post("/resend")
-def resend_verification(email: str, db: Session = Depends(database.get_db)):
+def resend_verification(request: EmailRequest, db: Session = Depends(database.get_db)):
     """Resend verification email"""
-    user = db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(models.User).filter(models.User.email == request.email).first()
     
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -107,14 +112,14 @@ def resend_verification(email: str, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=400, detail="Email already verified")
     
     # Remove old token if exists
-    tokens_to_remove = [t for t, data in verification_tokens.items() if data["email"] == email]
+    tokens_to_remove = [t for t, data in verification_tokens.items() if data["email"] == request.email]
     for t in tokens_to_remove:
         del verification_tokens[t]
     
     # Generate new token
     token = generate_verification_token()
     verification_tokens[token] = {
-        "email": email,
+        "email": request.email,
         "expires": datetime.now() + timedelta(hours=24)
     }
     
