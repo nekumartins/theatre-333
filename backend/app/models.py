@@ -156,6 +156,7 @@ class Booking(Base):
     booking_date = Column(TIMESTAMP, server_default=func.now())
     total_amount = Column(DECIMAL(10, 2), nullable=False)
     booking_status = Column(String(20), default="Pending")
+    payment_deadline = Column(TIMESTAMP, nullable=True)  # 15-minute deadline for payment
     cancellation_date = Column(TIMESTAMP)
     refund_amount = Column(DECIMAL(10, 2))
     created_at = Column(TIMESTAMP, server_default=func.now())

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Dict
-from app import models, schemas, database, utils
+from app import models, schemas, database, utils, ticket_utils
 
 router = APIRouter(prefix="/api/payments", tags=["Payments"])
 
@@ -55,6 +55,53 @@ def process_payment(
     # Update booking status only if payment successful
     if payment_success:
         booking.booking_status = "Confirmed"
+        
+        # Business requirement: Send confirmation email after successful payment
+        # Get booking details for email
+        performance = db.query(models.Performance).filter(
+            models.Performance.performance_id == booking.performance_id
+        ).first()
+        
+        show = db.query(models.Show).filter(
+            models.Show.show_id == performance.show_id
+        ).first()
+        
+        venue = db.query(models.Venue).filter(
+            models.Venue.venue_id == performance.venue_id
+        ).first()
+        
+        user = db.query(models.User).filter(
+            models.User.user_id == booking.user_id
+        ).first()
+        
+        booking_details = db.query(models.BookingDetail).filter(
+            models.BookingDetail.booking_id == booking.booking_id
+        ).all()
+        
+        seat_info = ", ".join([f"Row {bd.row_number} Seat {bd.seat_number}" for bd in booking_details])
+        
+        # Generate QR code for ticket
+        qr_code = ticket_utils.generate_qr_code(booking.booking_reference, booking.booking_id)
+        
+        booking_data = {
+            "booking_reference": booking.booking_reference,
+            "show_title": show.title,
+            "performance_date": performance.performance_date.strftime("%B %d, %Y"),
+            "start_time": performance.start_time.strftime("%I:%M %P"),
+            "venue_name": venue.venue_name,
+            "venue_address": f"{venue.address}, {venue.city}",
+            "seat_info": seat_info,
+            "total_amount": str(booking.total_amount),
+            "payment_status": "Confirmed",
+            "booking_date": booking.booking_date.strftime("%B %d, %Y %I:%M %P")
+        }
+        
+        # Send confirmation email (in production this would actually send)
+        email_result = ticket_utils.send_booking_confirmation(
+            user.email,
+            booking_data,
+            qr_code
+        )
     
     db.commit()
     db.refresh(new_payment)

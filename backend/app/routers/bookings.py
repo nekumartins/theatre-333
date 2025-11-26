@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from decimal import Decimal
-from app import models, schemas, database, utils
+from app import models, schemas, database, utils, ticket_utils
 
 router = APIRouter(prefix="/api/bookings", tags=["Bookings"])
 
@@ -64,9 +64,10 @@ def create_booking(
     new_booking = models.Booking(
         user_id=booking_data.user_id,
         performance_id=booking_data.performance_id,
-        booking_reference=utils.generate_booking_reference(),
+        booking_reference=ticket_utils.generate_booking_reference(),
         total_amount=total,
-        booking_status="Pending"
+        booking_status="Pending",
+        payment_deadline=ticket_utils.calculate_payment_deadline()  # 15-minute deadline
     )
     db.add(new_booking)
     db.flush()
@@ -222,3 +223,107 @@ def cancel_booking(booking_id: int, db: Session = Depends(database.get_db)):
     db.commit()
     
     return {"message": "Booking cancelled successfully"}
+
+
+@router.get("/{booking_id}/ticket")
+def get_ticket(booking_id: int, db: Session = Depends(database.get_db)):
+    """
+    Get booking ticket with QR code
+    Business requirement: Generate ticket with QR code for venue validation
+    """
+    booking = db.query(models.Booking).filter(
+        models.Booking.booking_id == booking_id
+    ).first()
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if booking.booking_status != "Confirmed":
+        raise HTTPException(status_code=400, detail="Booking must be confirmed and paid to generate ticket")
+    
+    # Get performance, show, venue details
+    performance = db.query(models.Performance).filter(
+        models.Performance.performance_id == booking.performance_id
+    ).first()
+    
+    show = db.query(models.Show).filter(
+        models.Show.show_id == performance.show_id
+    ).first()
+    
+    venue = db.query(models.Venue).filter(
+        models.Venue.venue_id == performance.venue_id
+    ).first()
+    
+    user = db.query(models.User).filter(
+        models.User.user_id == booking.user_id
+    ).first()
+    
+    # Get seats
+    booking_details = db.query(models.BookingDetail).filter(
+        models.BookingDetail.booking_id == booking_id
+    ).all()
+    
+    seat_info = ", ".join([f"Row {bd.row_number} Seat {bd.seat_number}" for bd in booking_details])
+    
+    # Generate QR code
+    qr_code = ticket_utils.generate_qr_code(booking.booking_reference, booking_id)
+    
+    # Prepare booking data for email/ticket
+    booking_data = {
+        "booking_reference": booking.booking_reference,
+        "show_title": show.title,
+        "performance_date": performance.performance_date.strftime("%B %d, %Y"),
+        "start_time": performance.start_time.strftime("%I:%M %P"),
+        "venue_name": venue.venue_name,
+        "venue_address": f"{venue.address}, {venue.city}",
+        "seat_info": seat_info,
+        "total_amount": str(booking.total_amount),
+        "payment_status": "Confirmed",
+        "booking_date": booking.booking_date.strftime("%B %d, %Y %I:%M %P")
+    }
+    
+    return {
+        "booking_id": booking_id,
+        "booking_reference": booking.booking_reference,
+        "qr_code": qr_code,
+        "booking_data": booking_data,
+        "message": "Ticket generated successfully"
+    }
+
+
+@router.post("/{booking_id}/send-confirmation")
+def send_confirmation_email(booking_id: int, db: Session = Depends(database.get_db)):
+    """
+    Send booking confirmation email with ticket and QR code
+    Business requirement: Email confirmation with booking details
+    """
+    booking = db.query(models.Booking).filter(
+        models.Booking.booking_id == booking_id
+    ).first()
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if booking.booking_status != "Confirmed":
+        raise HTTPException(status_code=400, detail="Can only send confirmation for confirmed bookings")
+    
+    # Get user
+    user = db.query(models.User).filter(
+        models.User.user_id == booking.user_id
+    ).first()
+    
+    # Get ticket data
+    ticket_response = get_ticket(booking_id, db)
+    
+    # Send email
+    email_result = ticket_utils.send_booking_confirmation(
+        user.email,
+        ticket_response["booking_data"],
+        ticket_response["qr_code"]
+    )
+    
+    return {
+        "message": "Confirmation email sent successfully",
+        "email_status": email_result["status"],
+        "recipient": email_result["recipient"]
+    }
