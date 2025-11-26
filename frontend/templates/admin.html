@@ -19,7 +19,7 @@
         </div>
 
         <!-- Tab Navigation -->
-        <div class="bg-[#12121a] rounded-lg p-1 mb-6 inline-flex space-x-1">
+        <div class="bg-[#12121a] rounded-lg p-1 mb-6 inline-flex space-x-1 flex-wrap">
             <button onclick="switchTab('shows')" id="showsTab" class="tab-btn active px-6 py-3 rounded-md transition-all">
                 Shows
             </button>
@@ -28,6 +28,12 @@
             </button>
             <button onclick="switchTab('performances')" id="performancesTab" class="tab-btn px-6 py-3 rounded-md transition-all">
                 Performances
+            </button>
+            <button onclick="switchTab('pricing')" id="pricingTab" class="tab-btn px-6 py-3 rounded-md transition-all">
+                Pricing
+            </button>
+            <button onclick="switchTab('analytics')" id="analyticsTab" class="tab-btn px-6 py-3 rounded-md transition-all">
+                Analytics
             </button>
         </div>
 
@@ -72,6 +78,84 @@
                 </div>
                 <div id="performancesList" class="space-y-4">
                     <!-- Performances will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Management -->
+        <div id="pricingSection" class="tab-content hidden">
+            <div class="bg-[#12121a] rounded-lg p-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-semibold text-white mb-4">Manage Performance Pricing</h2>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-300 mb-2">Select Performance</label>
+                            <select id="pricingPerformanceSelect" onchange="loadPricingForPerformance()" class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                                <option value="">-- Select Performance --</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="openPricingModal()" id="addPricingBtn" disabled class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">
+                                + Add Pricing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="pricingList" class="space-y-4">
+                    <p class="text-gray-400">Select a performance to manage pricing.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Dashboard -->
+        <div id="analyticsSection" class="tab-content hidden">
+            <div class="space-y-6">
+                <!-- Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="analyticsOverview">
+                    <!-- Will be populated -->
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Popular Shows -->
+                    <div class="bg-[#12121a] rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">Popular Shows</h3>
+                        <div id="popularShows" class="space-y-3">
+                            <!-- Will be populated -->
+                        </div>
+                    </div>
+
+                    <!-- Payment Methods -->
+                    <div class="bg-[#12121a] rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">Payment Methods</h3>
+                        <div id="paymentMethods" class="space-y-3">
+                            <!-- Will be populated -->
+                        </div>
+                    </div>
+
+                    <!-- Genre Performance -->
+                    <div class="bg-[#12121a] rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">Genre Performance</h3>
+                        <div id="genrePerformance" class="space-y-3">
+                            <!-- Will be populated -->
+                        </div>
+                    </div>
+
+                    <!-- Venue Utilization -->
+                    <div class="bg-[#12121a] rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">Venue Utilization</h3>
+                        <div id="venueUtilization" class="space-y-3">
+                            <!-- Will be populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue by Performance -->
+                <div class="bg-[#12121a] rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">Top Revenue Performances</h3>
+                    <div id="revenueByPerformance" class="overflow-x-auto">
+                        <!-- Will be populated -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -263,6 +347,38 @@
     </div>
 </div>
 
+<!-- Pricing Modal -->
+<div id="pricingModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-[#12121a] rounded-lg p-8 max-w-md w-full mx-4">
+        <h3 id="pricingModalTitle" class="text-2xl font-bold text-white mb-6">Add Pricing</h3>
+        <form id="pricingForm" class="space-y-4">
+            <input type="hidden" id="pricingId">
+            <input type="hidden" id="pricingPerformanceId">
+            <div>
+                <label class="block text-gray-300 mb-2">Seat Category *</label>
+                <select id="pricingCategory" required class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                    <option value="VIP">VIP</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Economy">Economy</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Price *</label>
+                <input type="number" step="0.01" min="0" id="pricingPrice" required class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+            </div>
+            <div class="flex justify-end space-x-4 mt-6">
+                <button type="button" onclick="closePricingModal()" class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition-opacity">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     // Check admin access
     function checkAdminAccess() {
@@ -306,6 +422,12 @@
         if (tab === 'shows') loadShows();
         else if (tab === 'venues') loadVenues();
         else if (tab === 'performances') loadPerformances();
+        else if (tab === 'pricing') {
+            loadPerformancesForPricing();
+        }
+        else if (tab === 'analytics') {
+            loadAnalytics();
+        }
     }
 
     // Load stats
@@ -806,6 +928,340 @@
         } catch (error) {
             console.error('Error deleting performance:', error);
             alert('Failed to delete performance');
+        }
+    }
+
+    // Pricing management
+    async function loadPerformancesForPricing() {
+        try {
+            const response = await fetch('/api/performances/');
+            if (response.ok) {
+                const performances = await response.json();
+                const select = document.getElementById('pricingPerformanceSelect');
+                select.innerHTML = '<option value="">-- Select Performance --</option>' + 
+                    performances.map(p => `<option value="${p.performance_id}">${p.show_title || 'Unknown'} - ${p.performance_date} ${p.start_time}</option>`).join('');
+            }
+        } catch (error) {
+            console.error('Error loading performances:', error);
+        }
+    }
+
+    async function loadPricingForPerformance() {
+        const performanceId = document.getElementById('pricingPerformanceSelect').value;
+        const addBtn = document.getElementById('addPricingBtn');
+        
+        if (!performanceId) {
+            document.getElementById('pricingList').innerHTML = '<p class="text-gray-400">Select a performance to manage pricing.</p>';
+            addBtn.disabled = true;
+            return;
+        }
+        
+        addBtn.disabled = false;
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch(`/api/admin/performances/${performanceId}/pricing`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const pricing = await response.json();
+                const pricingList = document.getElementById('pricingList');
+                
+                if (pricing.length === 0) {
+                    pricingList.innerHTML = '<p class="text-gray-400">No pricing set for this performance.</p>';
+                    return;
+                }
+                
+                pricingList.innerHTML = pricing.map(p => `
+                    <div class="bg-[#0a0a0f] rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-white font-semibold">${p.seat_category}</h3>
+                            <p class="text-purple-400 text-lg font-bold mt-1">$${parseFloat(p.price).toFixed(2)}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick='editPricing(${JSON.stringify(p)})' class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors">
+                                Edit
+                            </button>
+                            <button onclick="deletePricing(${p.pricing_id})" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error loading pricing:', error);
+        }
+    }
+
+    function openPricingModal() {
+        const performanceId = document.getElementById('pricingPerformanceSelect').value;
+        if (!performanceId) {
+            alert('Please select a performance first');
+            return;
+        }
+        
+        document.getElementById('pricingModalTitle').textContent = 'Add Pricing';
+        document.getElementById('pricingForm').reset();
+        document.getElementById('pricingId').value = '';
+        document.getElementById('pricingPerformanceId').value = performanceId;
+        document.getElementById('pricingModal').classList.remove('hidden');
+        document.getElementById('pricingModal').classList.add('flex');
+    }
+
+    function closePricingModal() {
+        document.getElementById('pricingModal').classList.add('hidden');
+        document.getElementById('pricingModal').classList.remove('flex');
+    }
+
+    function editPricing(pricing) {
+        document.getElementById('pricingModalTitle').textContent = 'Edit Pricing';
+        document.getElementById('pricingId').value = pricing.pricing_id;
+        document.getElementById('pricingCategory').value = pricing.seat_category;
+        document.getElementById('pricingCategory').disabled = true;
+        document.getElementById('pricingPrice').value = pricing.price;
+        
+        document.getElementById('pricingModal').classList.remove('hidden');
+        document.getElementById('pricingModal').classList.add('flex');
+    }
+
+    document.getElementById('pricingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        const pricingId = document.getElementById('pricingId').value;
+        
+        if (pricingId) {
+            // Update
+            const data = { price: parseFloat(document.getElementById('pricingPrice').value) };
+            
+            try {
+                const response = await fetch(`/api/admin/pricing/${pricingId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    closePricingModal();
+                    loadPricingForPerformance();
+                    alert('Pricing updated successfully!');
+                    document.getElementById('pricingCategory').disabled = false;
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || 'Failed to update pricing');
+                }
+            } catch (error) {
+                console.error('Error updating pricing:', error);
+                alert('Failed to update pricing');
+            }
+        } else {
+            // Create
+            const data = {
+                performance_id: parseInt(document.getElementById('pricingPerformanceId').value),
+                seat_category: document.getElementById('pricingCategory').value,
+                price: parseFloat(document.getElementById('pricingPrice').value)
+            };
+            
+            try {
+                const response = await fetch('/api/admin/pricing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    closePricingModal();
+                    loadPricingForPerformance();
+                    alert('Pricing created successfully!');
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || 'Failed to create pricing');
+                }
+            } catch (error) {
+                console.error('Error creating pricing:', error);
+                alert('Failed to create pricing');
+            }
+        }
+    });
+
+    async function deletePricing(pricingId) {
+        if (!confirm('Are you sure you want to delete this pricing?')) return;
+        
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch(`/api/admin/pricing/${pricingId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                loadPricingForPerformance();
+                alert('Pricing deleted successfully!');
+            } else {
+                const error = await response.json();
+                alert(error.detail || 'Failed to delete pricing');
+            }
+        } catch (error) {
+            console.error('Error deleting pricing:', error);
+            alert('Failed to delete pricing');
+        }
+    }
+
+    // Analytics functions
+    async function loadAnalytics() {
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            // Load dashboard overview
+            const dashResponse = await fetch('/api/analytics/dashboard', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (dashResponse.ok) {
+                const data = await response.json();
+                
+                document.getElementById('analyticsOverview').innerHTML = `
+                    <div class="bg-[#0a0a0f] rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-2">Total Revenue</p>
+                        <p class="text-3xl font-bold text-green-500">$${data.revenue.total.toFixed(2)}</p>
+                        <p class="text-gray-500 text-sm mt-2">All time</p>
+                    </div>
+                    <div class="bg-[#0a0a0f] rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-2">Booking Rate</p>
+                        <p class="text-3xl font-bold text-blue-500">${data.bookings.confirmation_rate.toFixed(1)}%</p>
+                        <p class="text-gray-500 text-sm mt-2">${data.bookings.confirmed}/${data.bookings.total} confirmed</p>
+                    </div>
+                    <div class="bg-[#0a0a0f] rounded-lg p-6">
+                        <p class="text-gray-400 text-sm mb-2">Payment Success</p>
+                        <p class="text-3xl font-bold text-purple-500">${data.payments.success_rate}%</p>
+                        <p class="text-gray-500 text-sm mt-2">${data.payments.successful}/${data.payments.total_attempts} successful</p>
+                    </div>
+                `;
+            }
+            
+            // Load popular shows
+            const showsResponse = await fetch('/api/analytics/popular-shows?limit=5', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (showsResponse.ok) {
+                const shows = await showsResponse.json();
+                document.getElementById('popularShows').innerHTML = shows.map((show, idx) => `
+                    <div class="flex justify-between items-center p-3 bg-[#0a0a0f] rounded">
+                        <div class="flex items-center">
+                            <span class="text-2xl font-bold text-purple-500 mr-3">${idx + 1}</span>
+                            <div>
+                                <p class="text-white font-semibold">${show.title}</p>
+                                <p class="text-gray-400 text-sm">${show.booking_count} bookings</p>
+                            </div>
+                        </div>
+                        <span class="text-green-500 font-bold">$${show.total_revenue.toFixed(2)}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Load payment methods
+            const paymentResponse = await fetch('/api/analytics/payment-methods', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (paymentResponse.ok) {
+                const methods = await paymentResponse.json();
+                document.getElementById('paymentMethods').innerHTML = methods.map(method => `
+                    <div class="flex justify-between items-center p-3 bg-[#0a0a0f] rounded">
+                        <div>
+                            <p class="text-white font-semibold">${method.payment_method}</p>
+                            <p class="text-gray-400 text-sm">${method.transaction_count} transactions</p>
+                        </div>
+                        <span class="text-purple-400 font-bold">$${method.total_amount.toFixed(2)}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Load genre performance
+            const genreResponse = await fetch('/api/analytics/genre-performance', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (genreResponse.ok) {
+                const genres = await genreResponse.json();
+                document.getElementById('genrePerformance').innerHTML = genres.map(genre => `
+                    <div class="p-3 bg-[#0a0a0f] rounded">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-white font-semibold">${genre.genre}</p>
+                            <span class="text-green-500 font-bold">$${genre.revenue.toFixed(2)}</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-gray-400">
+                            <span>${genre.show_count} shows</span>
+                            <span>${genre.booking_count} bookings</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Load venue utilization
+            const venueResponse = await fetch('/api/analytics/venue-utilization', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (venueResponse.ok) {
+                const venues = await venueResponse.json();
+                document.getElementById('venueUtilization').innerHTML = venues.map(venue => `
+                    <div class="p-3 bg-[#0a0a0f] rounded">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-white font-semibold">${venue.venue_name}</p>
+                            <span class="text-purple-400 font-bold">${venue.utilization_rate}%</span>
+                        </div>
+                        <div class="text-sm text-gray-400">
+                            ${venue.seats_sold} seats sold • ${venue.performance_count} performances
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Load revenue by performance
+            const revenueResponse = await fetch('/api/analytics/revenue-by-performance', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (revenueResponse.ok) {
+                const performances = await revenueResponse.json();
+                document.getElementById('revenueByPerformance').innerHTML = `
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="pb-3 text-gray-400 font-semibold">Show</th>
+                                <th class="pb-3 text-gray-400 font-semibold">Date</th>
+                                <th class="pb-3 text-gray-400 font-semibold">Venue</th>
+                                <th class="pb-3 text-gray-400 font-semibold text-right">Bookings</th>
+                                <th class="pb-3 text-gray-400 font-semibold text-right">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${performances.map(perf => `
+                                <tr class="border-b border-gray-800">
+                                    <td class="py-3 text-white">${perf.show_title}</td>
+                                    <td class="py-3 text-gray-400">${new Date(perf.performance_date).toLocaleDateString()}</td>
+                                    <td class="py-3 text-gray-400">${perf.venue_name}</td>
+                                    <td class="py-3 text-gray-400 text-right">${perf.booking_count}</td>
+                                    <td class="py-3 text-green-500 font-bold text-right">$${perf.revenue.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+        } catch (error) {
+            console.error('Error loading analytics:', error);
         }
     }
 

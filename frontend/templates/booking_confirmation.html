@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmation{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#0a0a0f] py-12">
+    <div class="max-w-3xl mx-auto px-4">
+        <!-- Success Message -->
+        <div class="text-center mb-8">
+            <div class="inline-block p-4 bg-green-500/20 rounded-full mb-4">
+                <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">Booking Confirmed!</h1>
+            <p class="text-gray-400">Your tickets have been reserved successfully</p>
+        </div>
+
+        <!-- Booking Details Card -->
+        <div id="bookingDetails" class="bg-[#12121a] rounded-lg border border-purple-500/20 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6 pb-6 border-b border-gray-700">
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Booking Reference</p>
+                        <p id="bookingRef" class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            Loading...
+                        </p>
+                    </div>
+                    <button onclick="printConfirmation()" class="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        Print
+                    </button>
+                </div>
+
+                <!-- Show Info -->
+                <div class="mb-6">
+                    <h2 id="showTitle" class="text-2xl font-bold text-white mb-4">Show Title</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-400 text-sm mb-1">Date</p>
+                            <p id="perfDate" class="text-white font-semibold">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm mb-1">Time</p>
+                            <p id="perfTime" class="text-white font-semibold">-</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-gray-400 text-sm mb-1">Venue</p>
+                            <p id="venueName" class="text-white font-semibold">-</p>
+                            <p id="venueAddress" class="text-gray-400 text-sm">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seats -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-white mb-3">Your Seats</h3>
+                    <div id="seatsList" class="space-y-2">
+                        <!-- Seats will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="border-t border-gray-700 pt-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xl font-semibold text-white">Total Amount</span>
+                        <span id="totalAmount" class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            $0.00
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Booking Status -->
+                <div class="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-yellow-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <p class="text-yellow-400 font-semibold">Payment Pending</p>
+                            <p class="text-gray-400 text-sm mt-1">Please complete your payment to confirm this booking.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex space-x-4">
+                    <a href="#" id="proceedPaymentBtn" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold text-center hover:opacity-90 transition-opacity">
+                        Proceed to Payment
+                    </a>
+                    <a href="/my-bookings" class="flex-1 px-6 py-3 bg-gray-700 text-white rounded-lg font-semibold text-center hover:bg-gray-600 transition-colors">
+                        View My Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code (Optional) -->
+        <div class="mt-6 text-center">
+            <div class="inline-block p-6 bg-white rounded-lg">
+                <div id="qrcode" class="flex items-center justify-center">
+                    <canvas id="qrCanvas" width="200" height="200"></canvas>
+                </div>
+                <p class="text-gray-600 text-sm mt-2">Scan for quick access</p>
+            </div>
+        </div>
+
+        <!-- Important Notes -->
+        <div class="mt-8 bg-[#12121a] rounded-lg border border-purple-500/10 p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Important Information</h3>
+            <ul class="space-y-2 text-gray-400 text-sm">
+                <li class="flex items-start">
+                    <span class="text-purple-400 mr-2">•</span>
+                    Please arrive at least 15 minutes before the show starts
+                </li>
+                <li class="flex items-start">
+                    <span class="text-purple-400 mr-2">•</span>
+                    Bring your booking reference or show the QR code at the entrance
+                </li>
+                <li class="flex items-start">
+                    <span class="text-purple-400 mr-2">•</span>
+                    Tickets are non-transferable and subject to our terms and conditions
+                </li>
+                <li class="flex items-start">
+                    <span class="text-purple-400 mr-2">•</span>
+                    Complete payment within 24 hours or your booking will be cancelled
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get booking ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('booking_id');
+
+    if (!bookingId) {
+        window.location.href = '/shows';
+    }
+
+    async function loadBookingDetails() {
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}`);
+            if (!response.ok) {
+                throw new Error('Booking not found');
+            }
+
+            const booking = await response.json();
+            
+            // Populate booking details
+            document.getElementById('bookingRef').textContent = booking.booking_reference || 'N/A';
+            document.getElementById('showTitle').textContent = booking.show_title || 'Unknown Show';
+            document.getElementById('perfDate').textContent = new Date(booking.performance_date).toLocaleDateString();
+            document.getElementById('perfTime').textContent = booking.performance_time || 'N/A';
+            document.getElementById('venueName').textContent = booking.venue_name || 'N/A';
+            document.getElementById('venueAddress').textContent = booking.venue_address || '';
+            document.getElementById('totalAmount').textContent = `$${parseFloat(booking.total_amount).toFixed(2)}`;
+
+            // Populate seats
+            const seatsList = document.getElementById('seatsList');
+            if (booking.seats && booking.seats.length > 0) {
+                seatsList.innerHTML = booking.seats.map(seat => `
+                    <div class="flex justify-between items-center bg-[#0a0a0f] p-3 rounded-lg">
+                        <div>
+                            <span class="text-white font-semibold">Row ${seat.row}, Seat ${seat.seat_number}</span>
+                            <span class="text-gray-400 text-sm ml-2">(${seat.category})</span>
+                        </div>
+                        <span class="text-purple-400 font-semibold">$${parseFloat(seat.price).toFixed(2)}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Set payment button link
+            document.getElementById('proceedPaymentBtn').href = `/booking/${bookingId}/payment`;
+
+            // Generate QR code
+            generateQRCode(booking.booking_reference);
+
+        } catch (error) {
+            console.error('Error loading booking:', error);
+            alert('Failed to load booking details');
+            window.location.href = '/shows';
+        }
+    }
+
+    function generateQRCode(reference) {
+        const canvas = document.getElementById('qrCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Simple QR-like visual (not actual QR code - would need library for real QR)
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, 200, 200);
+        ctx.fillStyle = '#fff';
+        ctx.font = '14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(reference, 100, 100);
+        ctx.font = '10px sans-serif';
+        ctx.fillText('Booking Reference', 100, 120);
+    }
+
+    function printConfirmation() {
+        window.print();
+    }
+
+    // Check if user is logged in
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        alert('Please login to view booking details');
+        window.location.href = '/login';
+    } else {
+        loadBookingDetails();
+    }
+</script>
+
+<style>
+    @media print {
+        nav, footer, button, .no-print {
+            display: none !important;
+        }
+        body {
+            background: white !important;
+        }
+    }
+</style>
+{% endblock %}

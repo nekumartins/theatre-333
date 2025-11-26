@@ -89,10 +89,35 @@ def create_booking(
     db.commit()
     db.refresh(new_booking)
     
+    # Get full booking details for confirmation
+    booking_details = []
+    for detail in db.query(models.BookingDetail).filter(
+        models.BookingDetail.booking_id == new_booking.booking_id
+    ).all():
+        booking_details.append({
+            "seat_id": detail.seat_id,
+            "row": detail.row_number,
+            "seat_number": detail.seat_number,
+            "category": detail.seat_category,
+            "price": float(detail.seat_price)
+        })
+    
+    # Get show and performance info
+    show = db.query(models.Show).filter(models.Show.show_id == performance.show_id).first()
+    venue = db.query(models.Venue).filter(models.Venue.venue_id == performance.venue_id).first()
+    
     return {
         "booking_id": new_booking.booking_id,
         "booking_reference": new_booking.booking_reference,
-        "total_amount": float(new_booking.total_amount)
+        "total_amount": float(new_booking.total_amount),
+        "booking_date": str(new_booking.booking_date),
+        "booking_status": new_booking.booking_status,
+        "show_title": show.title if show else None,
+        "performance_date": str(performance.performance_date),
+        "performance_time": str(performance.start_time),
+        "venue_name": venue.venue_name if venue else None,
+        "venue_address": venue.address_line1 if venue else None,
+        "seats": booking_details
     }
 
 
@@ -107,6 +132,54 @@ def get_booking_detail(booking_id: int, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=404, detail="Booking not found")
     
     return booking
+
+
+@router.get("/reference/{reference}")
+def get_booking_by_reference(reference: str, db: Session = Depends(database.get_db)):
+    """Get booking details by booking reference"""
+    booking = db.query(models.Booking).filter(
+        models.Booking.booking_reference == reference
+    ).first()
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    # Get performance and show details
+    performance = db.query(models.Performance).filter(
+        models.Performance.performance_id == booking.performance_id
+    ).first()
+    
+    show = db.query(models.Show).filter(
+        models.Show.show_id == performance.show_id
+    ).first() if performance else None
+    
+    venue = db.query(models.Venue).filter(
+        models.Venue.venue_id == performance.venue_id
+    ).first() if performance else None
+    
+    # Get booking details (seats)
+    seats = []
+    for detail in booking.booking_details:
+        seats.append({
+            "row": detail.row_number,
+            "seat_number": detail.seat_number,
+            "category": detail.seat_category,
+            "price": float(detail.seat_price)
+        })
+    
+    return {
+        "booking_id": booking.booking_id,
+        "booking_reference": booking.booking_reference,
+        "booking_status": booking.booking_status,
+        "booking_date": str(booking.booking_date),
+        "total_amount": float(booking.total_amount),
+        "show_title": show.title if show else None,
+        "performance_date": str(performance.performance_date) if performance else None,
+        "performance_time": str(performance.start_time) if performance else None,
+        "venue_name": venue.venue_name if venue else None,
+        "venue_address": f"{venue.address_line1}, {venue.city}" if venue else None,
+        "seats": seats
+    }
 
 
 @router.get("/user/{user_id}", response_model=List[schemas.BookingResponse])

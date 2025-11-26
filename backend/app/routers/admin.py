@@ -83,6 +83,16 @@ class PerformanceUpdate(BaseModel):
     special_notes: str | None = None
 
 
+class PerformancePricingCreate(BaseModel):
+    performance_id: int
+    seat_category: str
+    price: float
+
+
+class PerformancePricingUpdate(BaseModel):
+    price: float
+
+
 # ===== SHOW MANAGEMENT =====
 
 @router.post("/shows", status_code=status.HTTP_201_CREATED)
@@ -300,6 +310,101 @@ def delete_performance(
     db.commit()
     
     return {"message": "Performance deleted successfully"}
+
+
+# ===== PERFORMANCE PRICING MANAGEMENT =====
+
+@router.post("/pricing", status_code=status.HTTP_201_CREATED)
+def create_performance_pricing(
+    pricing: PerformancePricingCreate,
+    db: Session = Depends(database.get_db),
+    admin: dict = Depends(auth.verify_admin)
+):
+    """Create pricing for a performance seat category (Admin only)"""
+    # Verify performance exists
+    performance = db.query(models.Performance).filter(
+        models.Performance.performance_id == pricing.performance_id
+    ).first()
+    if not performance:
+        raise HTTPException(status_code=404, detail="Performance not found")
+    
+    # Check if pricing already exists for this category
+    existing = db.query(models.PerformancePricing).filter(
+        models.PerformancePricing.performance_id == pricing.performance_id,
+        models.PerformancePricing.seat_category == pricing.seat_category
+    ).first()
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Pricing for this category already exists. Use update endpoint.")
+    
+    new_pricing = models.PerformancePricing(**pricing.dict())
+    db.add(new_pricing)
+    db.commit()
+    db.refresh(new_pricing)
+    
+    return {"message": "Performance pricing created successfully", "pricing_id": new_pricing.pricing_id}
+
+
+@router.put("/pricing/{pricing_id}")
+def update_performance_pricing(
+    pricing_id: int,
+    pricing: PerformancePricingUpdate,
+    db: Session = Depends(database.get_db),
+    admin: dict = Depends(auth.verify_admin)
+):
+    """Update performance pricing (Admin only)"""
+    db_pricing = db.query(models.PerformancePricing).filter(
+        models.PerformancePricing.pricing_id == pricing_id
+    ).first()
+    
+    if not db_pricing:
+        raise HTTPException(status_code=404, detail="Pricing not found")
+    
+    db_pricing.price = pricing.price
+    db.commit()
+    
+    return {"message": "Pricing updated successfully"}
+
+
+@router.delete("/pricing/{pricing_id}")
+def delete_performance_pricing(
+    pricing_id: int,
+    db: Session = Depends(database.get_db),
+    admin: dict = Depends(auth.verify_admin)
+):
+    """Delete performance pricing (Admin only)"""
+    db_pricing = db.query(models.PerformancePricing).filter(
+        models.PerformancePricing.pricing_id == pricing_id
+    ).first()
+    
+    if not db_pricing:
+        raise HTTPException(status_code=404, detail="Pricing not found")
+    
+    db.delete(db_pricing)
+    db.commit()
+    
+    return {"message": "Pricing deleted successfully"}
+
+
+@router.get("/performances/{performance_id}/pricing")
+def get_performance_pricing(
+    performance_id: int,
+    db: Session = Depends(database.get_db),
+    admin: dict = Depends(auth.verify_admin)
+):
+    """Get all pricing for a performance (Admin only)"""
+    pricing = db.query(models.PerformancePricing).filter(
+        models.PerformancePricing.performance_id == performance_id
+    ).all()
+    
+    return [
+        {
+            "pricing_id": p.pricing_id,
+            "seat_category": p.seat_category,
+            "price": float(p.price)
+        }
+        for p in pricing
+    ]
 
 
 # ===== STATS & OVERVIEW =====
