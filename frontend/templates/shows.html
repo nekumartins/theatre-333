@@ -98,7 +98,8 @@
     async function loadGenres() {
         try {
             const response = await fetch('/api/shows/genres/');
-            const genres = await response.json();
+            const data = await response.json();
+            const genres = data.genres || data;
             const select = document.getElementById('genre-filter');
             genres.forEach(genre => {
                 const option = document.createElement('option');
@@ -114,7 +115,8 @@
     async function loadVenues() {
         try {
             const response = await fetch('/api/shows/venues/');
-            const venues = await response.json();
+            const data = await response.json();
+            const venues = data.venues || data;
             const select = document.getElementById('venue-filter');
             venues.forEach(venue => {
                 const option = document.createElement('option');
@@ -130,7 +132,8 @@
     async function loadAllPerformances() {
         try {
             const response = await fetch('/api/performances/');
-            allPerformances = await response.json();
+            const data = await response.json();
+            allPerformances = data.performances || data;
         } catch (error) {
             console.error('Error loading performances:', error);
         }
@@ -153,7 +156,10 @@
             }
             
             const response = await fetch(url);
-            allShows = await response.json();
+            const data = await response.json();
+            
+            // Handle wrapped response from API
+            allShows = data.shows || data;
             
             // Apply additional filters
             let filteredShows = allShows;

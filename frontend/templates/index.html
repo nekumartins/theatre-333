@@ -122,7 +122,8 @@
     async function loadShows() {
         try {
             const response = await fetch('/api/shows/?status=Active');
-            const shows = await response.json();
+            const data = await response.json();
+            const shows = data.shows || data;
             
             const container = document.getElementById('showsContainer');
             container.innerHTML = shows.map(show => {
