@@ -5,9 +5,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pathlib import Path
-from backend.app.routers import users, shows, performances, bookings, payments, profile, admin, verification, analytics
-from backend.app.database import get_db, engine
-from backend.app import models
+from app.routers import users, shows, performances, bookings, payments, profile, admin, verification, analytics
+from app.database import get_db, engine
+from app import models
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)

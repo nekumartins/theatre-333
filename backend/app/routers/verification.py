@@ -2,7 +2,7 @@ import secrets
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.app import models, database
+from app import models, database
 
 router = APIRouter(prefix="/api/verification", tags=["Email Verification"])
 

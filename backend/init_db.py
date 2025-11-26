@@ -67,7 +67,8 @@ def init_database():
                 phone="+1234567892",
                 password_hash=hash_password("password123"),
                 registration_date=today_date,
-                account_status="Active"
+                account_status="Active",
+                is_admin=True
             )
         ]
         db.add_all(users)

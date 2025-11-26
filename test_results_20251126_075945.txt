@@ -1,0 +1,142 @@
+
+============================================================
+              THEATRE BOOKING SYSTEM API TESTS              
+============================================================
+
+============================================================
+                    Testing Health Check                    
+============================================================
+
+Status: 200
+Response: {
+  "status": "healthy",
+  "message": "Theatre Booking System API is running"
+}
+
+============================================================
+                     Testing Get Genres                     
+============================================================
+
+Status: 200
+Number of genres: 5
+  - Drama: Serious narrative performances
+  - Comedy: Light-hearted and humorous shows
+  - Musical: Shows featuring songs and dance
+
+============================================================
+                     Testing Get Shows                      
+============================================================
+
+Status: 200
+Number of shows: 4
+  - Hamlet (180 min)
+  - Les Misérables (165 min)
+  - The Comedy of Errors (120 min)
+  - Macbeth (150 min)
+
+============================================================
+                  Testing Get Show Detail                   
+============================================================
+
+Status: 200
+Show: Hamlet
+Description: Shakespeare's tragic masterpiece about revenge and madness...
+Duration: 180 minutes
+Status: Active
+
+============================================================
+                  Testing Get Performances                  
+============================================================
+
+Status: 200
+Number of performances: 2
+  - Date: 2025-12-03, Time: 19:30:00
+    Available seats: 498/500
+  - Date: 2025-12-04, Time: 19:30:00
+    Available seats: 500/500
+
+============================================================
+                Testing Get Available Seats                 
+============================================================
+
+Status: 200
+Total available seats: 491
+
+Seats by category:
+  - VIP: 30 seats
+  - Premium: 75 seats
+  - Standard: 154 seats
+  - Economy: 232 seats
+
+Sample pricing (first seat in each category):
+  - VIP: £75.0
+  - Premium: £50.0
+  - Standard: £30.0
+  - Economy: £20.0
+
+============================================================
+                 Testing User Registration                  
+============================================================
+
+Status: 201
+User created successfully!
+  User ID: 5
+  Message: User registered successfully
+
+============================================================
+                     Testing User Login                     
+============================================================
+
+Status: 200
+Login successful!
+  Token type: bearer
+  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6Ik...
+
+============================================================
+                   Testing Create Booking                   
+============================================================
+
+Status: 400
+Booking failed: {"detail":"Seat 1 already booked"}
+
+============================================================
+                 Testing Get User Bookings                  
+============================================================
+
+Status: 200
+Number of bookings: 2
+
+  Booking: BK202511260759324VF6
+  Date: 2025-11-26T06:59:32
+  Total: £150.00
+  Status: Pending
+
+  Booking: BK20251124001
+  Date: 2025-11-26T06:58:43
+  Total: £100.00
+  Status: Confirmed
+
+============================================================
+                    TEST RESULTS SUMMARY                    
+============================================================
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Chukwuneku\theatre-333\test_api.py", line 292, in <module>
+    success = run_all_tests()
+              ^^^^^^^^^^^^^^^
+  File "C:\Users\USER\Chukwuneku\theatre-333\test_api.py", line 282, in run_all_tests
+    print(f"{status:8} - {test_name}")
+  File "C:\ProgramData\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2713' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\USER\Chukwuneku\theatre-333\test_api.py", line 299, in <module>
+    print(f"\n\u2717 ERROR: {e}")
+  File "C:\ProgramData\anaconda3\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2717' in position 2: character maps to <undefined>

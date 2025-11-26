@@ -20,25 +20,26 @@ echo ""
 
 # Test 2: User Registration (Regular User)
 echo -e "${YELLOW}2. Testing User Registration${NC}"
+TEST_EMAIL="testuser_$(date +%s)@test.com"
 RESPONSE=$(curl -s -X POST ${BASE_URL}/api/users/register \
   -H "Content-Type: application/json" \
-  -d '{
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john.doe@test.com",
-    "password": "test123",
-    "phone": "1112223333",
-    "date_of_birth": "1992-05-15",
-    "address_line1": "789 Test Ave",
-    "city": "Test Town",
-    "postal_code": "99999",
-    "country": "Testland"
-  }')
+  -d "{
+    \"first_name\": \"John\",
+    \"last_name\": \"Doe\",
+    \"email\": \"$TEST_EMAIL\",
+    \"password\": \"test123\",
+    \"phone\": \"1112223333\",
+    \"date_of_birth\": \"1992-05-15\",
+    \"address_line1\": \"789 Test Ave\",
+    \"city\": \"Test Town\",
+    \"postal_code\": \"99999\",
+    \"country\": \"Testland\"
+  }")
 if echo "$RESPONSE" | grep -q "User registered successfully"; then
     echo -e "${GREEN}✓ User registration successful${NC}"
     USER_ID=$(echo "$RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['user_id'])" 2>/dev/null)
 else
-    echo -e "${RED}✗ User registration failed${NC}"
+    echo -e "${RED}✗ User registration failed: $RESPONSE${NC}"
 fi
 echo ""
 
@@ -47,7 +48,7 @@ echo -e "${YELLOW}3. Testing User Login${NC}"
 LOGIN_RESPONSE=$(curl -s -X POST ${BASE_URL}/api/users/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
+    "email": "john.doe@example.com",
     "password": "password123"
   }')
 if echo "$LOGIN_RESPONSE" | grep -q "access_token"; then
@@ -64,8 +65,8 @@ echo -e "${YELLOW}4. Testing Admin Login${NC}"
 ADMIN_LOGIN=$(curl -s -X POST ${BASE_URL}/api/users/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@example.com",
-    "password": "admin123"
+    "email": "admin@theatre.com",
+    "password": "password123"
   }')
 if echo "$ADMIN_LOGIN" | grep -q "access_token"; then
     echo -e "${GREEN}✓ Admin login successful${NC}"
@@ -95,13 +96,14 @@ echo ""
 # Test 6: Create Genre (Admin)
 echo -e "${YELLOW}6. Testing Genre Creation (Admin)${NC}"
 if [ ! -z "$ADMIN_TOKEN" ]; then
+    GENRE_NAME="TestGenre_$(date +%s)"
     GENRE_RESPONSE=$(curl -s -X POST ${BASE_URL}/api/admin/genres \
       -H "Authorization: Bearer $ADMIN_TOKEN" \
       -H "Content-Type: application/json" \
-      -d '{
-        "genre_name": "Musical",
-        "description": "Musical theatre performances"
-      }')
+      -d "{
+        \"genre_name\": \"$GENRE_NAME\",
+        \"description\": \"Test genre for automated testing\"
+      }")
     if echo "$GENRE_RESPONSE" | grep -q "genre_id"; then
         echo -e "${GREEN}✓ Genre creation successful${NC}"
         GENRE_ID=$(echo "$GENRE_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['genre_id'])" 2>/dev/null)
@@ -210,7 +212,7 @@ echo ""
 echo -e "${YELLOW}11. Testing Email Verification${NC}"
 VERIFY_RESPONSE=$(curl -s -X POST ${BASE_URL}/api/verification/send-verification \
   -H "Content-Type: application/json" \
-  -d '{"email": "test@example.com"}')
+  -d '{"email": "john.doe@example.com"}')
 if echo "$VERIFY_RESPONSE" | grep -q "token"; then
     echo -e "${GREEN}✓ Verification email sent${NC}"
     VERIFY_TOKEN=$(echo "$VERIFY_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 2>/dev/null)
@@ -225,8 +227,9 @@ echo -e "${YELLOW}12. Testing Admin Statistics${NC}"
 if [ ! -z "$ADMIN_TOKEN" ]; then
     STATS=$(curl -s -X GET ${BASE_URL}/api/admin/stats \
       -H "Authorization: Bearer $ADMIN_TOKEN")
-    if echo "$STATS" | grep -q "total_shows"; then
+    if echo "$STATS" | grep -q "shows"; then
         echo -e "${GREEN}✓ Admin stats retrieval successful${NC}"
+        echo "Stats: $(echo "$STATS" | python3 -c "import sys, json; d=json.load(sys.stdin); print(f\"Shows: {d['shows']['total']}, Venues: {d['venues']['total']}, Users: {d['users']['total']}\")" 2>/dev/null)"
     else
         echo -e "${RED}✗ Admin stats failed${NC}"
     fi
@@ -240,8 +243,9 @@ echo -e "${YELLOW}13. Testing Analytics Dashboard${NC}"
 if [ ! -z "$ADMIN_TOKEN" ]; then
     ANALYTICS=$(curl -s -X GET ${BASE_URL}/api/analytics/dashboard \
       -H "Authorization: Bearer $ADMIN_TOKEN")
-    if echo "$ANALYTICS" | grep -q "total_revenue"; then
+    if echo "$ANALYTICS" | grep -q "revenue"; then
         echo -e "${GREEN}✓ Analytics dashboard successful${NC}"
+        echo "Revenue: $(echo "$ANALYTICS" | python3 -c "import sys, json; d=json.load(sys.stdin); print(f\"\${d['revenue']['total']} {d['revenue']['currency']}\")" 2>/dev/null)"
     else
         echo -e "${RED}✗ Analytics dashboard failed${NC}"
     fi

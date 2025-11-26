@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
 from typing import List, Dict
-from backend.app import models, schemas, database
+from app import models, schemas, database
 
 router = APIRouter(prefix="/api/performances", tags=["Performances"])
 

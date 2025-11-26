@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
-from typing import List
-from backend.app import models, schemas, database, utils
+from typing import Dict
+from app import models, schemas, database, utils
 
 router = APIRouter(prefix="/api/payments", tags=["Payments"])
 

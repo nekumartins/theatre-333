@@ -29,9 +29,17 @@ def test_get_genres():
     response = requests.get(f"{BASE_URL}/api/shows/genres/")
     print(f"Status: {response.status_code}")
     data = response.json()
-    print(f"Number of genres: {len(data)}")
-    for genre in data[:3]:  # Show first 3
-        print(f"  - {genre['genre_name']}: {genre['description']}")
+    
+    # Handle both list and object responses
+    if isinstance(data, dict):
+        genres = data.get('genres', [])
+        print(f"Number of genres: {len(genres)}")
+        for genre in genres[:3]:  # Show first 3
+            print(f"  - {genre.get('genre_name', 'N/A')}: {genre.get('description', 'N/A')}")
+    else:
+        print(f"Number of genres: {len(data)}")
+        for genre in data[:3]:  # Show first 3
+            print(f"  - {genre['genre_name']}: {genre['description']}")
     return response.status_code == 200
 
 def test_get_shows():
@@ -40,8 +48,11 @@ def test_get_shows():
     response = requests.get(f"{BASE_URL}/api/shows/?status=Active")
     print(f"Status: {response.status_code}")
     data = response.json()
-    print(f"Number of shows: {len(data)}")
-    for show in data:
+    
+    # Handle both list and object responses
+    shows = data.get('shows', data) if isinstance(data, dict) else data
+    print(f"Number of shows: {len(shows)}")
+    for show in shows:
         print(f"  - {show['title']} ({show['duration_minutes']} min)")
     return response.status_code == 200
 
@@ -64,7 +75,9 @@ def test_get_performances():
     response = requests.get(f"{BASE_URL}/api/performances/show/1")
     print(f"Status: {response.status_code}")
     if response.status_code == 200:
-        performances = response.json()
+        data = response.json()
+        # Handle both list and object responses
+        performances = data.get('performances', data) if isinstance(data, dict) else data
         print(f"Number of performances: {len(performances)}")
         for perf in performances[:2]:  # Show first 2
             print(f"  - Date: {perf['performance_date']}, Time: {perf['start_time']}")
