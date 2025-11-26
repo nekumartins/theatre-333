@@ -100,6 +100,12 @@
             const response = await fetch('/api/shows/genres/');
             const data = await response.json();
             const genres = data.genres || data;
+            
+            if (!Array.isArray(genres)) {
+                console.error('Invalid genres data format');
+                return;
+            }
+            
             const select = document.getElementById('genre-filter');
             genres.forEach(genre => {
                 const option = document.createElement('option');
@@ -117,6 +123,12 @@
             const response = await fetch('/api/shows/venues/');
             const data = await response.json();
             const venues = data.venues || data;
+            
+            if (!Array.isArray(venues)) {
+                console.error('Invalid venues data format');
+                return;
+            }
+            
             const select = document.getElementById('venue-filter');
             venues.forEach(venue => {
                 const option = document.createElement('option');
@@ -134,8 +146,14 @@
             const response = await fetch('/api/performances/');
             const data = await response.json();
             allPerformances = data.performances || data;
+            
+            if (!Array.isArray(allPerformances)) {
+                console.error('Invalid performances data format');
+                allPerformances = [];
+            }
         } catch (error) {
             console.error('Error loading performances:', error);
+            allPerformances = [];
         }
     }
 
@@ -160,6 +178,12 @@
             
             // Handle wrapped response from API
             allShows = data.shows || data;
+            
+            // Ensure allShows is an array
+            if (!Array.isArray(allShows)) {
+                console.error('Invalid shows data format:', allShows);
+                throw new Error('Invalid data format received from server');
+            }
             
             // Apply additional filters
             let filteredShows = allShows;
@@ -236,7 +260,11 @@
         } catch (error) {
             console.error('Error loading shows:', error);
             document.getElementById('shows-container').innerHTML = 
-                '<p class="col-span-full text-center text-pink-400">Error loading shows.</p>';
+                `<div class="col-span-full text-center p-12">
+                    <div class="text-6xl mb-4">⚠️</div>
+                    <p class="text-pink-400 mb-2">Error loading shows</p>
+                    <p class="text-gray-400 text-sm">Please make sure the server is running and try refreshing the page.</p>
+                </div>`;
         }
     }
 
