@@ -2,25 +2,24 @@
 
 {% block title %}My Bookings{% endblock %}
 
-{% block head %}
+{% block preauth %}
 <script>
-    // Immediate authentication check - runs before page renders
     (function() {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-            window.location.href = '/login';
-        } else {
+        function isTokenValid(token) {
+            if (!token) return false;
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 const exp = payload.exp * 1000;
-                if (Date.now() >= exp) {
-                    localStorage.clear();
-                    window.location.href = '/login';
-                }
+                return Date.now() < exp;
             } catch (e) {
-                localStorage.clear();
-                window.location.href = '/login';
+                return false;
             }
+        }
+
+        const token = localStorage.getItem('access_token');
+        if (!token || !isTokenValid(token)) {
+            localStorage.clear();
+            window.location.href = '/login';
         }
     })();
 </script>

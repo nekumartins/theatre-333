@@ -2,6 +2,29 @@
 
 {% block title %}Payment{% endblock %}
 
+{% block preauth %}
+<script>
+    (function() {
+        function isTokenValid(token) {
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp * 1000;
+                return Date.now() < exp;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        const token = localStorage.getItem('access_token');
+        if (!token || !isTokenValid(token)) {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    })();
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="max-w-2xl mx-auto">
     <h1 class="text-3xl font-bold mb-8 text-center">Complete Payment</h1>

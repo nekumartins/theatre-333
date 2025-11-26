@@ -2,6 +2,29 @@
 
 {% block title %}Select Seats{% endblock %}
 
+{% block preauth %}
+<script>
+    (function() {
+        function isTokenValid(token) {
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp * 1000;
+                return Date.now() < exp;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        const token = localStorage.getItem('access_token');
+        if (!token || !isTokenValid(token)) {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    })();
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-[#0a0a0f] py-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -2,6 +2,36 @@
 
 {% block title %}Admin Panel - Theatre Booking System{% endblock %}
 
+{% block preauth %}
+<script>
+    (function() {
+        function isTokenValid(token) {
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp * 1000;
+                return Date.now() < exp;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        const token = localStorage.getItem('access_token');
+        const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+        if (!token || !isTokenValid(token)) {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+
+        if (!isAdmin) {
+            // Not an admin - redirect to home
+            window.location.href = '/';
+        }
+    })();
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-[#0a0a0f] py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -432,7 +462,7 @@
 
     // Load stats
     async function loadStats() {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         
         try {
             const response = await fetch('/api/admin/stats', {
