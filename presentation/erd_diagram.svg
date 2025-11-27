@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <defs>
+    <!-- Crow's Foot Markers -->
+    <marker id="crowfoot-many" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto">
+      <path d="M0,6 L12,0 M0,6 L12,6 M0,6 L12,12" stroke="#a78bfa" stroke-width="1.5" fill="none"/>
+    </marker>
+    <marker id="crowfoot-one" markerWidth="12" markerHeight="12" refX="12" refY="6" orient="auto">
+      <line x1="8" y1="0" x2="8" y2="12" stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="12" y1="0" x2="12" y2="12" stroke="#a78bfa" stroke-width="1.5"/>
+    </marker>
+    <marker id="crowfoot-zero-many" markerWidth="16" markerHeight="12" refX="16" refY="6" orient="auto">
+      <circle cx="4" cy="6" r="3" stroke="#a78bfa" stroke-width="1.5" fill="none"/>
+      <path d="M8,6 L16,0 M8,6 L16,6 M8,6 L16,12" stroke="#a78bfa" stroke-width="1.5" fill="none"/>
+    </marker>
+    <marker id="crowfoot-one-mandatory" markerWidth="12" markerHeight="12" refX="0" refY="6" orient="auto">
+      <line x1="0" y1="0" x2="0" y2="12" stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="4" y1="0" x2="4" y2="12" stroke="#a78bfa" stroke-width="1.5"/>
+    </marker>
+    
+    <!-- Drop Shadow Filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#0a0a0f"/>
+  
+  <!-- Title -->
+  <text x="800" y="35" text-anchor="middle" fill="#8b5cf6" font-family="Arial, sans-serif" font-size="22" font-weight="bold">Theatre Booking System - Entity Relationship Diagram (Crow's Foot Notation)</text>
+  <text x="800" y="55" text-anchor="middle" fill="#a78bfa" font-family="Arial, sans-serif" font-size="14">13 Entities including RBAC (Role-Based Access Control) and Audit Logging</text>
+  
+  <!-- ==================== ENTITIES - ROW 1 ==================== -->
+  
+  <!-- ROLE Entity (Top Left - NEW) -->
+  <g transform="translate(30, 80)" filter="url(#shadow)">
+    <rect width="180" height="200" rx="8" fill="#1a1a24" stroke="#10b981" stroke-width="2"/>
+    <rect width="180" height="35" rx="8" fill="#10b981"/>
+    <rect x="0" y="27" width="180" height="8" fill="#10b981"/>
+    <text x="90" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">ROLE</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK role_id</text>
+    <text x="10" y="70" fill="white" font-family="Consolas, monospace" font-size="10">role_name</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">description</text>
+    <text x="10" y="100" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">can_manage_shows</text>
+    <text x="10" y="115" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">can_manage_venues</text>
+    <text x="10" y="130" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">can_manage_performances</text>
+    <text x="10" y="145" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">can_manage_bookings</text>
+    <text x="10" y="160" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">can_view_analytics</text>
+    <text x="10" y="175" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">can_manage_users</text>
+    <text x="10" y="190" fill="white" font-family="Consolas, monospace" font-size="10">created_at</text>
+  </g>
+  
+  <!-- USER Entity -->
+  <g transform="translate(240, 80)" filter="url(#shadow)">
+    <rect width="175" height="215" rx="8" fill="#1a1a24" stroke="#8b5cf6" stroke-width="2"/>
+    <rect width="175" height="35" rx="8" fill="#8b5cf6"/>
+    <rect x="0" y="27" width="175" height="8" fill="#8b5cf6"/>
+    <text x="87" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">USER</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK user_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK role_id</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">first_name</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">last_name</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">email</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">phone</text>
+    <text x="10" y="145" fill="white" font-family="Consolas, monospace" font-size="10">password_hash</text>
+    <text x="10" y="160" fill="white" font-family="Consolas, monospace" font-size="10">account_status</text>
+    <text x="10" y="175" fill="white" font-family="Consolas, monospace" font-size="10">is_admin</text>
+    <text x="10" y="190" fill="white" font-family="Consolas, monospace" font-size="10">registration_date</text>
+    <text x="10" y="205" fill="white" font-family="Consolas, monospace" font-size="10">created_at</text>
+  </g>
+  
+  <!-- AUDIT_LOG Entity (NEW) -->
+  <g transform="translate(445, 80)" filter="url(#shadow)">
+    <rect width="175" height="185" rx="8" fill="#1a1a24" stroke="#10b981" stroke-width="2"/>
+    <rect width="175" height="35" rx="8" fill="#10b981"/>
+    <rect x="0" y="27" width="175" height="8" fill="#10b981"/>
+    <text x="87" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">AUDIT_LOG</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK log_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK user_id</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">action</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">entity_type</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">entity_id</text>
+    <text x="10" y="130" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">old_values (JSON)</text>
+    <text x="10" y="145" fill="#a78bfa" font-family="Consolas, monospace" font-size="10">new_values (JSON)</text>
+    <text x="10" y="160" fill="white" font-family="Consolas, monospace" font-size="10">ip_address</text>
+    <text x="10" y="175" fill="white" font-family="Consolas, monospace" font-size="10">timestamp</text>
+  </g>
+  
+  <!-- GENRE Entity -->
+  <g transform="translate(650, 80)" filter="url(#shadow)">
+    <rect width="155" height="100" rx="8" fill="#1a1a24" stroke="#8b5cf6" stroke-width="2"/>
+    <rect width="155" height="35" rx="8" fill="#8b5cf6"/>
+    <rect x="0" y="27" width="155" height="8" fill="#8b5cf6"/>
+    <text x="77" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">GENRE</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK genre_id</text>
+    <text x="10" y="70" fill="white" font-family="Consolas, monospace" font-size="10">genre_name</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">description</text>
+  </g>
+  
+  <!-- VENUE Entity -->
+  <g transform="translate(835, 80)" filter="url(#shadow)">
+    <rect width="165" height="145" rx="8" fill="#1a1a24" stroke="#8b5cf6" stroke-width="2"/>
+    <rect width="165" height="35" rx="8" fill="#8b5cf6"/>
+    <rect x="0" y="27" width="165" height="8" fill="#8b5cf6"/>
+    <text x="82" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">VENUE</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK venue_id</text>
+    <text x="10" y="70" fill="white" font-family="Consolas, monospace" font-size="10">venue_name</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">address_line1</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">city</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">total_capacity</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">created_at</text>
+  </g>
+  
+  <!-- SEAT_CATEGORY_PRICING Entity -->
+  <g transform="translate(1030, 80)" filter="url(#shadow)">
+    <rect width="180" height="115" rx="8" fill="#1a1a24" stroke="#8b5cf6" stroke-width="2"/>
+    <rect width="180" height="35" rx="8" fill="#8b5cf6"/>
+    <rect x="0" y="27" width="180" height="8" fill="#8b5cf6"/>
+    <text x="90" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">SEAT_CATEGORY_PRICING</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK category_id</text>
+    <text x="10" y="70" fill="white" font-family="Consolas, monospace" font-size="10">category_name</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">base_price</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">description</text>
+  </g>
+  
+  <!-- ==================== ENTITIES - ROW 2 ==================== -->
+  
+  <!-- SHOW Entity -->
+  <g transform="translate(240, 340)" filter="url(#shadow)">
+    <rect width="180" height="185" rx="8" fill="#1a1a24" stroke="#ec4899" stroke-width="2"/>
+    <rect width="180" height="35" rx="8" fill="#ec4899"/>
+    <rect x="0" y="27" width="180" height="8" fill="#ec4899"/>
+    <text x="90" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SHOW</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK show_id</text>
+    <text x="10" y="70" fill="white" font-family="Consolas, monospace" font-size="10">title</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">description</text>
+    <text x="10" y="100" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK genre_id</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">duration_minutes</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">language</text>
+    <text x="10" y="145" fill="white" font-family="Consolas, monospace" font-size="10">age_rating</text>
+    <text x="10" y="160" fill="white" font-family="Consolas, monospace" font-size="10">show_status</text>
+    <text x="10" y="175" fill="white" font-family="Consolas, monospace" font-size="10">created_at</text>
+  </g>
+  
+  <!-- SEAT Entity -->
+  <g transform="translate(835, 260)" filter="url(#shadow)">
+    <rect width="165" height="160" rx="8" fill="#1a1a24" stroke="#ec4899" stroke-width="2"/>
+    <rect width="165" height="35" rx="8" fill="#ec4899"/>
+    <rect x="0" y="27" width="165" height="8" fill="#ec4899"/>
+    <text x="82" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SEAT</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK seat_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK venue_id</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">row_number</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">seat_number</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">section</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">seat_category</text>
+    <text x="10" y="145" fill="white" font-family="Consolas, monospace" font-size="10">is_accessible</text>
+  </g>
+  
+  <!-- PERFORMANCE Entity -->
+  <g transform="translate(500, 340)" filter="url(#shadow)">
+    <rect width="185" height="185" rx="8" fill="#1a1a24" stroke="#f59e0b" stroke-width="2"/>
+    <rect width="185" height="35" rx="8" fill="#f59e0b"/>
+    <rect x="0" y="27" width="185" height="8" fill="#f59e0b"/>
+    <text x="92" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">PERFORMANCE</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK performance_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK show_id</text>
+    <text x="10" y="85" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK venue_id</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">performance_date</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">start_time</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">end_time</text>
+    <text x="10" y="145" fill="white" font-family="Consolas, monospace" font-size="10">total_seats</text>
+    <text x="10" y="160" fill="white" font-family="Consolas, monospace" font-size="10">available_seats</text>
+    <text x="10" y="175" fill="white" font-family="Consolas, monospace" font-size="10">performance_status</text>
+  </g>
+  
+  <!-- PERFORMANCE_PRICING Entity -->
+  <g transform="translate(1030, 260)" filter="url(#shadow)">
+    <rect width="180" height="115" rx="8" fill="#1a1a24" stroke="#f59e0b" stroke-width="2"/>
+    <rect width="180" height="35" rx="8" fill="#f59e0b"/>
+    <rect x="0" y="27" width="180" height="8" fill="#f59e0b"/>
+    <text x="90" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">PERFORMANCE_PRICING</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK pricing_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK performance_id</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">seat_category</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">price</text>
+  </g>
+  
+  <!-- ==================== ENTITIES - ROW 3 ==================== -->
+  
+  <!-- BOOKING Entity -->
+  <g transform="translate(240, 600)" filter="url(#shadow)">
+    <rect width="180" height="185" rx="8" fill="#1a1a24" stroke="#06b6d4" stroke-width="2"/>
+    <rect width="180" height="35" rx="8" fill="#06b6d4"/>
+    <rect x="0" y="27" width="180" height="8" fill="#06b6d4"/>
+    <text x="90" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">BOOKING</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK booking_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK user_id</text>
+    <text x="10" y="85" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK performance_id</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">booking_reference</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">booking_date</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">total_amount</text>
+    <text x="10" y="145" fill="white" font-family="Consolas, monospace" font-size="10">booking_status</text>
+    <text x="10" y="160" fill="white" font-family="Consolas, monospace" font-size="10">cancellation_date</text>
+    <text x="10" y="175" fill="white" font-family="Consolas, monospace" font-size="10">refund_amount</text>
+  </g>
+  
+  <!-- BOOKING_DETAIL Entity -->
+  <g transform="translate(500, 600)" filter="url(#shadow)">
+    <rect width="175" height="145" rx="8" fill="#1a1a24" stroke="#06b6d4" stroke-width="2"/>
+    <rect width="175" height="35" rx="8" fill="#06b6d4"/>
+    <rect x="0" y="27" width="175" height="8" fill="#06b6d4"/>
+    <text x="87" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">BOOKING_DETAIL</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK booking_detail_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK booking_id</text>
+    <text x="10" y="85" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK seat_id</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">seat_price</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">row_number</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">seat_category</text>
+  </g>
+  
+  <!-- PAYMENT Entity -->
+  <g transform="translate(760, 600)" filter="url(#shadow)">
+    <rect width="180" height="190" rx="8" fill="#1a1a24" stroke="#22c55e" stroke-width="2"/>
+    <rect width="180" height="35" rx="8" fill="#22c55e"/>
+    <rect x="0" y="27" width="180" height="8" fill="#22c55e"/>
+    <text x="90" y="24" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">PAYMENT</text>
+    <text x="10" y="55" fill="#fbbf24" font-family="Consolas, monospace" font-size="10">PK payment_id</text>
+    <text x="10" y="70" fill="#60a5fa" font-family="Consolas, monospace" font-size="10">FK booking_id</text>
+    <text x="10" y="85" fill="white" font-family="Consolas, monospace" font-size="10">payment_amount</text>
+    <text x="10" y="100" fill="white" font-family="Consolas, monospace" font-size="10">payment_method</text>
+    <text x="10" y="115" fill="white" font-family="Consolas, monospace" font-size="10">payment_date</text>
+    <text x="10" y="130" fill="white" font-family="Consolas, monospace" font-size="10">transaction_id</text>
+    <text x="10" y="145" fill="white" font-family="Consolas, monospace" font-size="10">payment_status</text>
+    <text x="10" y="160" fill="white" font-family="Consolas, monospace" font-size="10">card_last_four</text>
+    <text x="10" y="175" fill="white" font-family="Consolas, monospace" font-size="10">refund_date</text>
+  </g>
+  
+  <!-- ==================== RELATIONSHIPS ==================== -->
+  
+  <!-- ROLE (1) ---< USER (M) - One Role has Many Users -->
+  <line x1="210" y1="170" x2="240" y2="170" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- USER (1) ---o< AUDIT_LOG (M) - One User has Many Audit Logs (Optional) -->
+  <line x1="415" y1="170" x2="445" y2="170" stroke="#a78bfa" stroke-width="2" stroke-dasharray="5,5" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- GENRE (1) ---< SHOW (M) -->
+  <line x1="727" y1="180" x2="420" y2="380" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- VENUE (1) ---< SEAT (M) -->
+  <line x1="917" y1="225" x2="917" y2="260" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- VENUE (1) ---< PERFORMANCE (M) -->
+  <line x1="835" y1="180" x2="685" y2="380" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- SHOW (1) ---< PERFORMANCE (M) -->
+  <line x1="420" y1="430" x2="500" y2="430" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- PERFORMANCE (1) ---< PERFORMANCE_PRICING (M) -->
+  <line x1="685" y1="380" x2="1030" y2="320" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- USER (1) ---< BOOKING (M) -->
+  <line x1="330" y1="295" x2="330" y2="600" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- PERFORMANCE (1) ---< BOOKING (M) -->
+  <line x1="592" y1="525" x2="420" y2="650" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- BOOKING (1) ---< BOOKING_DETAIL (M) -->
+  <line x1="420" y1="690" x2="500" y2="690" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- SEAT (1) ---o< BOOKING_DETAIL (M) -->
+  <line x1="917" y1="420" x2="587" y2="640" stroke="#a78bfa" stroke-width="2" stroke-dasharray="5,5" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- BOOKING (1) ---o< PAYMENT (M) -->
+  <line x1="420" y1="720" x2="760" y2="720" stroke="#a78bfa" stroke-width="2" marker-start="url(#crowfoot-one)" marker-end="url(#crowfoot-many)"/>
+  
+  <!-- ==================== LEGEND ==================== -->
+  <g transform="translate(1240, 500)">
+    <rect width="340" height="280" rx="8" fill="#1a1a24" stroke="#4b5563" stroke-width="1"/>
+    <text x="170" y="25" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Legend</text>
+    
+    <!-- Primary Key -->
+    <rect x="15" y="45" width="15" height="15" fill="#fbbf24"/>
+    <text x="40" y="57" fill="white" font-family="Arial, sans-serif" font-size="12">Primary Key (PK)</text>
+    
+    <!-- Foreign Key -->
+    <rect x="15" y="70" width="15" height="15" fill="#60a5fa"/>
+    <text x="40" y="82" fill="white" font-family="Arial, sans-serif" font-size="12">Foreign Key (FK)</text>
+    
+    <!-- RBAC Entity -->
+    <rect x="15" y="95" width="15" height="15" fill="#10b981"/>
+    <text x="40" y="107" fill="white" font-family="Arial, sans-serif" font-size="12">RBAC/Audit Entity</text>
+    
+    <!-- Mandatory Relationship -->
+    <line x1="15" y1="130" x2="80" y2="130" stroke="#a78bfa" stroke-width="2"/>
+    <text x="90" y="134" fill="white" font-family="Arial, sans-serif" font-size="12">Mandatory Relationship</text>
+    
+    <!-- Optional Relationship -->
+    <line x1="15" y1="155" x2="80" y2="155" stroke="#a78bfa" stroke-width="2" stroke-dasharray="5,5"/>
+    <text x="90" y="159" fill="white" font-family="Arial, sans-serif" font-size="12">Optional Relationship</text>
+    
+    <!-- One -->
+    <line x1="15" y1="180" x2="50" y2="180" stroke="#a78bfa" stroke-width="2" marker-end="url(#crowfoot-one)"/>
+    <text x="90" y="184" fill="white" font-family="Arial, sans-serif" font-size="12">One (|)</text>
+    
+    <!-- Many -->
+    <line x1="15" y1="205" x2="50" y2="205" stroke="#a78bfa" stroke-width="2" marker-end="url(#crowfoot-many)"/>
+    <text x="90" y="209" fill="white" font-family="Arial, sans-serif" font-size="12">Many (crow's foot)</text>
+    
+    <!-- Entity Count -->
+    <text x="15" y="240" fill="#a78bfa" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Total Entities: 13</text>
+    <text x="15" y="260" fill="#a78bfa" font-family="Arial, sans-serif" font-size="11">Including ROLE and AUDIT_LOG for RBAC</text>
+  </g>
+  
+  <!-- ==================== FOOTER ==================== -->
+  <text x="800" y="1170" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="12">CSC 333 - Database Systems | Online Theatre Booking System | Crow's Foot Notation ERD</text>
+  <text x="800" y="1188" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="11">Version 2.0 | November 27, 2025 | 13 Entities (3NF Normalized)</text>
+</svg>

@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theatre Booking System - Project Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem;
+            scroll-snap-align: start;
+        }
+        
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .slide-number {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(139, 92, 246, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: #a78bfa;
+        }
+        
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-dot:hover, .nav-dot.active {
+            background: #8b5cf6;
+            transform: scale(1.2);
+        }
+        
+        .erd-table {
+            background: #1e1e2e;
+            border: 2px solid #8b5cf6;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            min-width: 180px;
+        }
+        
+        .erd-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            padding: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .erd-row {
+            padding: 0.25rem 0.5rem;
+            border-bottom: 1px solid #333;
+            font-size: 0.75rem;
+        }
+        
+        .pk { color: #fbbf24; }
+        .fk { color: #60a5fa; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .delay-4 { animation-delay: 0.4s; opacity: 0; }
+        .delay-5 { animation-delay: 0.5s; opacity: 0; }
+    </style>
+</head>
+<body class="bg-[#0a0a0f] text-white overflow-x-hidden">
+    
+    <!-- Navigation Dots -->
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- Slide 1: Title -->
+    <section class="slide" id="slide1">
+        <div class="max-w-5xl mx-auto text-center">
+            <h1 class="text-7xl font-bold mb-6 animate-in">
+                <span class="gradient-text">Theatre Booking System</span>
+            </h1>
+            <p class="text-2xl text-gray-400 mb-8 animate-in delay-1">A Complete Database Design & Implementation Project</p>
+            <div class="flex justify-center gap-4 animate-in delay-2">
+                <span class="px-4 py-2 bg-purple-500/20 text-purple-300 rounded-full">CSC 333</span>
+                <span class="px-4 py-2 bg-pink-500/20 text-pink-300 rounded-full">Database Systems</span>
+            </div>
+            <div class="mt-16 animate-in delay-3">
+                <p class="text-gray-500">Presented by</p>
+                <p class="text-xl text-white mt-2">Chukwuneku Akpotohwo</p>
+                <p class="text-gray-400">akpotohwoo@gmail.com</p>
+            </div>
+            <div class="mt-12 animate-in delay-4">
+                <p class="text-gray-600 text-sm">November 2025</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 2: Project Overview -->
+    <section class="slide" id="slide2">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Project Overview</h2>
+            <div class="grid grid-cols-2 gap-8">
+                <div class="card animate-in delay-1">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">🎯 Objective</h3>
+                    <p class="text-gray-300">Design and implement a comprehensive database system for managing theatre operations, including shows, performances, bookings, and payments.</p>
+                </div>
+                <div class="card animate-in delay-2">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">🎭 Domain</h3>
+                    <p class="text-gray-300">Online theatre ticket booking platform with real-time seat selection, multiple payment methods, and e-ticket generation.</p>
+                </div>
+                <div class="card animate-in delay-3">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">🛠️ Technology Stack</h3>
+                    <ul class="text-gray-300 space-y-1">
+                        <li>• Backend: FastAPI (Python)</li>
+                        <li>• Database: MySQL</li>
+                        <li>• ORM: SQLAlchemy</li>
+                        <li>• Frontend: HTML/Tailwind CSS</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-4">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">✨ Key Features</h3>
+                    <ul class="text-gray-300 space-y-1">
+                        <li>• User authentication & RBAC</li>
+                        <li>• Real-time seat selection</li>
+                        <li>• Multiple payment methods</li>
+                        <li>• E-ticket with QR codes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Business Requirements -->
+    <section class="slide" id="slide3">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Business Requirements</h2>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="card animate-in delay-1">
+                    <div class="text-4xl mb-4">👥</div>
+                    <h3 class="text-lg font-semibold text-white mb-2">User Management</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• Registration & Login</li>
+                        <li>• Profile management</li>
+                        <li>• Role-based access</li>
+                        <li>• Password recovery</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-2">
+                    <div class="text-4xl mb-4">🎪</div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Show Management</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• Multiple shows & genres</li>
+                        <li>• Performance scheduling</li>
+                        <li>• Venue management</li>
+                        <li>• Dynamic pricing</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-3">
+                    <div class="text-4xl mb-4">💺</div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Seat Selection</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• Interactive seat map</li>
+                        <li>• Real-time availability</li>
+                        <li>• Multiple seat categories</li>
+                        <li>• Price by section</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-4">
+                    <div class="text-4xl mb-4">🎫</div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Booking System</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• Multi-seat booking</li>
+                        <li>• Booking confirmation</li>
+                        <li>• Cancellation policy</li>
+                        <li>• Booking history</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-5">
+                    <div class="text-4xl mb-4">💳</div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Payment Processing</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• Multiple methods</li>
+                        <li>• Secure transactions</li>
+                        <li>• Refund handling</li>
+                        <li>• Payment status tracking</li>
+                    </ul>
+                </div>
+                <div class="card animate-in delay-5">
+                    <div class="text-4xl mb-4">🎟️</div>
+                    <h3 class="text-lg font-semibold text-white mb-2">E-Ticket System</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• QR code generation</li>
+                        <li>• Digital delivery</li>
+                        <li>• Ticket validation</li>
+                        <li>• Print-friendly format</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 4: Conceptual Model (ERD) -->
+    <section class="slide" id="slide4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-5xl font-bold mb-8 gradient-text">Conceptual Model (ERD)</h2>
+            <p class="text-gray-400 mb-8">Entity-Relationship Diagram showing the main entities and their relationships</p>
+            
+            <div class="flex flex-wrap justify-center gap-4 scale-90">
+                <!-- User Entity -->
+                <div class="erd-table animate-in delay-1">
+                    <div class="erd-header">USER</div>
+                    <div class="erd-row"><span class="pk">PK</span> user_id</div>
+                    <div class="erd-row">email</div>
+                    <div class="erd-row">password_hash</div>
+                    <div class="erd-row">full_name</div>
+                    <div class="erd-row">phone</div>
+                    <div class="erd-row">is_admin</div>
+                </div>
+                
+                <!-- Show Entity -->
+                <div class="erd-table animate-in delay-2">
+                    <div class="erd-header">SHOW</div>
+                    <div class="erd-row"><span class="pk">PK</span> show_id</div>
+                    <div class="erd-row">title</div>
+                    <div class="erd-row">description</div>
+                    <div class="erd-row">duration_minutes</div>
+                    <div class="erd-row"><span class="fk">FK</span> genre_id</div>
+                    <div class="erd-row"><span class="fk">FK</span> venue_id</div>
+                </div>
+                
+                <!-- Performance Entity -->
+                <div class="erd-table animate-in delay-3">
+                    <div class="erd-header">PERFORMANCE</div>
+                    <div class="erd-row"><span class="pk">PK</span> performance_id</div>
+                    <div class="erd-row"><span class="fk">FK</span> show_id</div>
+                    <div class="erd-row">performance_date</div>
+                    <div class="erd-row">base_price</div>
+                    <div class="erd-row">available_seats</div>
+                </div>
+                
+                <!-- Booking Entity -->
+                <div class="erd-table animate-in delay-4">
+                    <div class="erd-header">BOOKING</div>
+                    <div class="erd-row"><span class="pk">PK</span> booking_id</div>
+                    <div class="erd-row"><span class="fk">FK</span> user_id</div>
+                    <div class="erd-row"><span class="fk">FK</span> performance_id</div>
+                    <div class="erd-row">booking_date</div>
+                    <div class="erd-row">total_amount</div>
+                    <div class="erd-row">status</div>
+                </div>
+                
+                <!-- Payment Entity -->
+                <div class="erd-table animate-in delay-5">
+                    <div class="erd-header">PAYMENT</div>
+                    <div class="erd-row"><span class="pk">PK</span> payment_id</div>
+                    <div class="erd-row"><span class="fk">FK</span> booking_id</div>
+                    <div class="erd-row">amount</div>
+                    <div class="erd-row">payment_method</div>
+                    <div class="erd-row">status</div>
+                    <div class="erd-row">transaction_ref</div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-center gap-8 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="pk font-bold">PK</span>
+                    <span class="text-gray-400">Primary Key</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="fk font-bold">FK</span>
+                    <span class="text-gray-400">Foreign Key</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Entity Relationships -->
+    <section class="slide" id="slide5">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Entity Relationships</h2>
+            <div class="space-y-6">
+                <div class="card animate-in delay-1">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">👤</span>
+                        <span class="text-purple-400 font-semibold">USER</span>
+                        <span class="text-gray-500">—— 1:N ——</span>
+                        <span class="text-pink-400 font-semibold">BOOKING</span>
+                        <span class="text-gray-400 ml-4">A user can make many bookings</span>
+                    </div>
+                </div>
+                <div class="card animate-in delay-2">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">🎭</span>
+                        <span class="text-purple-400 font-semibold">SHOW</span>
+                        <span class="text-gray-500">—— 1:N ——</span>
+                        <span class="text-pink-400 font-semibold">PERFORMANCE</span>
+                        <span class="text-gray-400 ml-4">A show has many performances</span>
+                    </div>
+                </div>
+                <div class="card animate-in delay-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">🎪</span>
+                        <span class="text-purple-400 font-semibold">PERFORMANCE</span>
+                        <span class="text-gray-500">—— 1:N ——</span>
+                        <span class="text-pink-400 font-semibold">BOOKING</span>
+                        <span class="text-gray-400 ml-4">A performance has many bookings</span>
+                    </div>
+                </div>
+                <div class="card animate-in delay-4">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">🎫</span>
+                        <span class="text-purple-400 font-semibold">BOOKING</span>
+                        <span class="text-gray-500">—— 1:N ——</span>
+                        <span class="text-pink-400 font-semibold">BOOKING_SEAT</span>
+                        <span class="text-gray-400 ml-4">A booking includes many seats</span>
+                    </div>
+                </div>
+                <div class="card animate-in delay-5">
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl">💳</span>
+                        <span class="text-purple-400 font-semibold">BOOKING</span>
+                        <span class="text-gray-500">—— 1:1 ——</span>
+                        <span class="text-pink-400 font-semibold">PAYMENT</span>
+                        <span class="text-gray-400 ml-4">Each booking has one payment</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Logical Model -->
+    <section class="slide" id="slide6">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Logical Model</h2>
+            <p class="text-gray-400 mb-8">Normalized database schema (3NF) with complete attribute definitions</p>
+            
+            <div class="grid grid-cols-2 gap-6">
+                <div class="card animate-in delay-1">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Users Table</h3>
+                    <code class="text-sm text-gray-300">
+                        users(<span class="text-yellow-400">user_id</span>, email, password_hash, full_name, phone, is_admin, is_active, created_at)
+                    </code>
+                </div>
+                <div class="card animate-in delay-2">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Shows Table</h3>
+                    <code class="text-sm text-gray-300">
+                        shows(<span class="text-yellow-400">show_id</span>, title, description, duration_minutes, <span class="text-blue-400">genre_id</span>, <span class="text-blue-400">venue_id</span>, base_price, is_active)
+                    </code>
+                </div>
+                <div class="card animate-in delay-3">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Performances Table</h3>
+                    <code class="text-sm text-gray-300">
+                        performances(<span class="text-yellow-400">performance_id</span>, <span class="text-blue-400">show_id</span>, performance_date, performance_type, base_price, total_seats, available_seats)
+                    </code>
+                </div>
+                <div class="card animate-in delay-4">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Bookings Table</h3>
+                    <code class="text-sm text-gray-300">
+                        bookings(<span class="text-yellow-400">booking_id</span>, <span class="text-blue-400">user_id</span>, <span class="text-blue-400">performance_id</span>, booking_date, total_amount, status, booking_reference)
+                    </code>
+                </div>
+                <div class="card animate-in delay-5">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Payments Table</h3>
+                    <code class="text-sm text-gray-300">
+                        payments(<span class="text-yellow-400">payment_id</span>, <span class="text-blue-400">booking_id</span>, amount, payment_method, status, transaction_reference, payment_date)
+                    </code>
+                </div>
+                <div class="card animate-in delay-5">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Booking_Seats Table</h3>
+                    <code class="text-sm text-gray-300">
+                        booking_seats(<span class="text-yellow-400">booking_seat_id</span>, <span class="text-blue-400">booking_id</span>, <span class="text-blue-400">seat_id</span>, price_paid)
+                    </code>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex gap-6 text-sm">
+                <span><span class="text-yellow-400">■</span> Primary Key</span>
+                <span><span class="text-blue-400">■</span> Foreign Key</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 7: Normalization -->
+    <section class="slide" id="slide7">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Normalization Process</h2>
+            
+            <div class="space-y-8">
+                <div class="card animate-in delay-1">
+                    <h3 class="text-xl font-semibold text-green-400 mb-3">✓ First Normal Form (1NF)</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• All attributes contain atomic (indivisible) values</li>
+                        <li>• Each table has a primary key</li>
+                        <li>• No repeating groups (seats stored in separate table)</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-2">
+                    <h3 class="text-xl font-semibold text-green-400 mb-3">✓ Second Normal Form (2NF)</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Satisfies 1NF</li>
+                        <li>• No partial dependencies on composite keys</li>
+                        <li>• All non-key attributes fully depend on the primary key</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-3">
+                    <h3 class="text-xl font-semibold text-green-400 mb-3">✓ Third Normal Form (3NF)</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Satisfies 2NF</li>
+                        <li>• No transitive dependencies</li>
+                        <li>• Genre and Venue extracted to separate tables</li>
+                        <li>• Seat categories normalized into SeatCategory table</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: Physical Model -->
+    <section class="slide" id="slide8">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-8 gradient-text">Physical Model (SQL)</h2>
+            <p class="text-gray-400 mb-6">MySQL implementation with proper data types and constraints</p>
+            
+            <div class="bg-[#1e1e2e] rounded-xl p-6 overflow-x-auto animate-in delay-1">
+                <pre class="text-sm"><code class="text-gray-300">
+<span class="text-purple-400">CREATE TABLE</span> users (
+    user_id <span class="text-blue-400">INT</span> <span class="text-yellow-400">PRIMARY KEY AUTO_INCREMENT</span>,
+    email <span class="text-blue-400">VARCHAR(255)</span> <span class="text-pink-400">UNIQUE NOT NULL</span>,
+    password_hash <span class="text-blue-400">VARCHAR(255)</span> <span class="text-pink-400">NOT NULL</span>,
+    full_name <span class="text-blue-400">VARCHAR(100)</span>,
+    phone <span class="text-blue-400">VARCHAR(20)</span>,
+    is_admin <span class="text-blue-400">BOOLEAN</span> <span class="text-gray-500">DEFAULT FALSE</span>,
+    created_at <span class="text-blue-400">TIMESTAMP</span> <span class="text-gray-500">DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="text-purple-400">CREATE TABLE</span> bookings (
+    booking_id <span class="text-blue-400">INT</span> <span class="text-yellow-400">PRIMARY KEY AUTO_INCREMENT</span>,
+    user_id <span class="text-blue-400">INT</span> <span class="text-pink-400">NOT NULL</span>,
+    performance_id <span class="text-blue-400">INT</span> <span class="text-pink-400">NOT NULL</span>,
+    total_amount <span class="text-blue-400">DECIMAL(10,2)</span> <span class="text-pink-400">NOT NULL</span>,
+    status <span class="text-blue-400">ENUM</span>('pending','confirmed','cancelled'),
+    <span class="text-green-400">FOREIGN KEY</span> (user_id) <span class="text-green-400">REFERENCES</span> users(user_id),
+    <span class="text-green-400">FOREIGN KEY</span> (performance_id) <span class="text-green-400">REFERENCES</span> performances(performance_id)
+);
+                </code></pre>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4 mt-6">
+                <div class="card animate-in delay-2 text-center">
+                    <p class="text-3xl font-bold text-purple-400">11</p>
+                    <p class="text-gray-400 text-sm">Tables</p>
+                </div>
+                <div class="card animate-in delay-3 text-center">
+                    <p class="text-3xl font-bold text-pink-400">MySQL</p>
+                    <p class="text-gray-400 text-sm">Database Engine</p>
+                </div>
+                <div class="card animate-in delay-4 text-center">
+                    <p class="text-3xl font-bold text-purple-400">15+</p>
+                    <p class="text-gray-400 text-sm">Foreign Keys</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 9: Application Architecture -->
+    <section class="slide" id="slide9">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Application Architecture</h2>
+            
+            <div class="flex justify-center items-center gap-8">
+                <!-- Frontend -->
+                <div class="card text-center animate-in delay-1" style="width: 200px;">
+                    <div class="text-4xl mb-4">🖥️</div>
+                    <h3 class="font-semibold text-white mb-2">Frontend</h3>
+                    <p class="text-gray-400 text-sm">HTML/Jinja2<br>Tailwind CSS<br>JavaScript</p>
+                </div>
+                
+                <div class="text-4xl text-purple-400 animate-in delay-2">→</div>
+                
+                <!-- API Layer -->
+                <div class="card text-center animate-in delay-2" style="width: 200px;">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="font-semibold text-white mb-2">API Layer</h3>
+                    <p class="text-gray-400 text-sm">FastAPI<br>REST Endpoints<br>JWT Auth</p>
+                </div>
+                
+                <div class="text-4xl text-purple-400 animate-in delay-3">→</div>
+                
+                <!-- ORM -->
+                <div class="card text-center animate-in delay-3" style="width: 200px;">
+                    <div class="text-4xl mb-4">🔄</div>
+                    <h3 class="font-semibold text-white mb-2">ORM Layer</h3>
+                    <p class="text-gray-400 text-sm">SQLAlchemy<br>Alembic<br>Migrations</p>
+                </div>
+                
+                <div class="text-4xl text-purple-400 animate-in delay-4">→</div>
+                
+                <!-- Database -->
+                <div class="card text-center animate-in delay-4" style="width: 200px;">
+                    <div class="text-4xl mb-4">🗄️</div>
+                    <h3 class="font-semibold text-white mb-2">Database</h3>
+                    <p class="text-gray-400 text-sm">MySQL 8.0<br>InnoDB<br>ACID Compliant</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 grid grid-cols-4 gap-4">
+                <div class="card text-center animate-in delay-5">
+                    <p class="text-2xl font-bold text-purple-400">15+</p>
+                    <p class="text-gray-400 text-xs">API Endpoints</p>
+                </div>
+                <div class="card text-center animate-in delay-5">
+                    <p class="text-2xl font-bold text-pink-400">JWT</p>
+                    <p class="text-gray-400 text-xs">Authentication</p>
+                </div>
+                <div class="card text-center animate-in delay-5">
+                    <p class="text-2xl font-bold text-purple-400">RBAC</p>
+                    <p class="text-gray-400 text-xs">Authorization</p>
+                </div>
+                <div class="card text-center animate-in delay-5">
+                    <p class="text-2xl font-bold text-pink-400">REST</p>
+                    <p class="text-gray-400 text-xs">API Design</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 10: Key Features Demo -->
+    <section class="slide" id="slide10">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Key Features</h2>
+            
+            <div class="grid grid-cols-2 gap-8">
+                <div class="card animate-in delay-1">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">🔐 Authentication System</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Secure password hashing (bcrypt)</li>
+                        <li>• JWT token-based authentication</li>
+                        <li>• Token expiration & refresh</li>
+                        <li>• Protected API routes</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-2">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">💺 Interactive Seat Selection</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Visual seat map (491 seats)</li>
+                        <li>• Real-time availability</li>
+                        <li>• 5 seat categories with pricing</li>
+                        <li>• Multi-seat selection</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-3">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">💳 Payment Processing</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Credit Card support</li>
+                        <li>• PayPal integration ready</li>
+                        <li>• Bank Transfer option</li>
+                        <li>• Transaction tracking</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-4">
+                    <h3 class="text-xl font-semibold text-purple-400 mb-4">🎟️ E-Ticket Generation</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Unique QR codes</li>
+                        <li>• Digital delivery</li>
+                        <li>• Print-friendly design</li>
+                        <li>• Ticket validation system</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 11: Database Queries -->
+    <section class="slide" id="slide11">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-8 gradient-text">Sample Queries</h2>
+            
+            <div class="space-y-6">
+                <div class="card animate-in delay-1">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Get User's Booking History</h3>
+                    <div class="bg-[#1e1e2e] rounded-lg p-4">
+                        <code class="text-sm text-gray-300">
+                            <span class="text-purple-400">SELECT</span> b.booking_id, s.title, p.performance_date, b.total_amount, b.status<br>
+                            <span class="text-purple-400">FROM</span> bookings b<br>
+                            <span class="text-purple-400">JOIN</span> performances p <span class="text-purple-400">ON</span> b.performance_id = p.performance_id<br>
+                            <span class="text-purple-400">JOIN</span> shows s <span class="text-purple-400">ON</span> p.show_id = s.show_id<br>
+                            <span class="text-purple-400">WHERE</span> b.user_id = <span class="text-yellow-400">?</span> <span class="text-purple-400">ORDER BY</span> b.booking_date <span class="text-purple-400">DESC</span>;
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="card animate-in delay-2">
+                    <h3 class="text-lg font-semibold text-purple-400 mb-3">Get Available Seats for Performance</h3>
+                    <div class="bg-[#1e1e2e] rounded-lg p-4">
+                        <code class="text-sm text-gray-300">
+                            <span class="text-purple-400">SELECT</span> s.seat_id, s.row_name, s.seat_number, sc.category_name, sc.price_multiplier<br>
+                            <span class="text-purple-400">FROM</span> seats s<br>
+                            <span class="text-purple-400">JOIN</span> seat_categories sc <span class="text-purple-400">ON</span> s.category_id = sc.category_id<br>
+                            <span class="text-purple-400">WHERE</span> s.seat_id <span class="text-purple-400">NOT IN</span> (<br>
+                            &nbsp;&nbsp;<span class="text-purple-400">SELECT</span> bs.seat_id <span class="text-purple-400">FROM</span> booking_seats bs<br>
+                            &nbsp;&nbsp;<span class="text-purple-400">JOIN</span> bookings b <span class="text-purple-400">ON</span> bs.booking_id = b.booking_id<br>
+                            &nbsp;&nbsp;<span class="text-purple-400">WHERE</span> b.performance_id = <span class="text-yellow-400">?</span> <span class="text-purple-400">AND</span> b.status != <span class="text-green-400">'cancelled'</span><br>
+                            );
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 12: Security Features -->
+    <section class="slide" id="slide12">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Security Implementation</h2>
+            
+            <div class="grid grid-cols-2 gap-8">
+                <div class="card animate-in delay-1">
+                    <div class="text-4xl mb-4">🔒</div>
+                    <h3 class="text-xl font-semibold text-white mb-3">Password Security</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Bcrypt hashing algorithm</li>
+                        <li>• Salt rounds for extra security</li>
+                        <li>• No plain-text storage</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-2">
+                    <div class="text-4xl mb-4">🎫</div>
+                    <h3 class="text-xl font-semibold text-white mb-3">JWT Authentication</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Token-based sessions</li>
+                        <li>• Expiration management</li>
+                        <li>• Secure token validation</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-3">
+                    <div class="text-4xl mb-4">👮</div>
+                    <h3 class="text-xl font-semibold text-white mb-3">Role-Based Access (RBAC)</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• Admin vs User roles</li>
+                        <li>• Protected admin routes</li>
+                        <li>• Resource-level permissions</li>
+                    </ul>
+                </div>
+                
+                <div class="card animate-in delay-4">
+                    <div class="text-4xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-semibold text-white mb-3">Data Protection</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>• SQL injection prevention (ORM)</li>
+                        <li>• Input validation (Pydantic)</li>
+                        <li>• CORS configuration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 13: Testing -->
+    <section class="slide" id="slide13">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Testing & Validation</h2>
+            
+            <div class="card animate-in delay-1 mb-8">
+                <h3 class="text-xl font-semibold text-green-400 mb-4">✓ All Endpoints Tested</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="text-purple-400 mb-2">Frontend Pages</h4>
+                        <ul class="text-gray-300 text-sm space-y-1">
+                            <li>✓ Home Page (200 OK)</li>
+                            <li>✓ Shows Page (200 OK)</li>
+                            <li>✓ Login/Register (200 OK)</li>
+                            <li>✓ My Bookings (200 OK)</li>
+                            <li>✓ Admin Panel (200 OK)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-purple-400 mb-2">API Endpoints</h4>
+                        <ul class="text-gray-300 text-sm space-y-1">
+                            <li>✓ /api/shows (200 OK)</li>
+                            <li>✓ /api/performances (200 OK)</li>
+                            <li>✓ /api/bookings (200 OK)</li>
+                            <li>✓ /api/payments (200 OK)</li>
+                            <li>✓ /api/users (200 OK)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-4">
+                <div class="card text-center animate-in delay-2">
+                    <p class="text-3xl font-bold text-green-400">100%</p>
+                    <p class="text-gray-400 text-sm">Endpoint Coverage</p>
+                </div>
+                <div class="card text-center animate-in delay-3">
+                    <p class="text-3xl font-bold text-green-400">0</p>
+                    <p class="text-gray-400 text-sm">Critical Errors</p>
+                </div>
+                <div class="card text-center animate-in delay-4">
+                    <p class="text-3xl font-bold text-green-400">✓</p>
+                    <p class="text-gray-400 text-sm">Production Ready</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 14: Challenges & Solutions -->
+    <section class="slide" id="slide14">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-5xl font-bold mb-12 gradient-text">Challenges & Solutions</h2>
+            
+            <div class="space-y-6">
+                <div class="card animate-in delay-1">
+                    <div class="flex gap-4">
+                        <div class="text-red-400 text-2xl">❌</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-2">Challenge: Real-time Seat Availability</h3>
+                            <p class="text-gray-400 text-sm">Preventing double-booking when multiple users select the same seat simultaneously.</p>
+                        </div>
+                        <div class="text-green-400 text-2xl">✓</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-2">Solution: Database Transactions</h3>
+                            <p class="text-gray-400 text-sm">Used SQLAlchemy transactions with proper locking to ensure atomicity of seat bookings.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card animate-in delay-2">
+                    <div class="flex gap-4">
+                        <div class="text-red-400 text-2xl">❌</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-2">Challenge: Token Authentication</h3>
+                            <p class="text-gray-400 text-sm">Managing token state across multiple page templates consistently.</p>
+                        </div>
+                        <div class="text-green-400 text-2xl">✓</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-2">Solution: Centralized Token Management</h3>
+                            <p class="text-gray-400 text-sm">Standardized localStorage key and added token validation in base template.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card animate-in delay-3">
+                    <div class="flex gap-4">
+                        <div class="text-red-400 text-2xl">❌</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-2">Challenge: Complex Seat Pricing</h3>
+                            <p class="text-gray-400 text-sm">Different prices for different seat categories and performances.</p>
+                        </div>
+                        <div class="text-green-400 text-2xl">✓</div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-2">Solution: Price Multiplier System</h3>
+                            <p class="text-gray-400 text-sm">Implemented seat categories with multipliers applied to base performance price.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 15: Conclusion -->
+    <section class="slide" id="slide15">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-5xl font-bold mb-8 gradient-text animate-in">Conclusion</h2>
+            
+            <div class="card max-w-3xl mx-auto animate-in delay-1 mb-12">
+                <p class="text-xl text-gray-300 leading-relaxed">
+                    Successfully designed and implemented a comprehensive theatre booking system 
+                    demonstrating proper database design principles, normalization, and full-stack 
+                    development practices.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-4 mb-12">
+                <div class="card animate-in delay-2">
+                    <p class="text-2xl font-bold text-purple-400">11</p>
+                    <p class="text-gray-400 text-sm">Database Tables</p>
+                </div>
+                <div class="card animate-in delay-2">
+                    <p class="text-2xl font-bold text-pink-400">3NF</p>
+                    <p class="text-gray-400 text-sm">Normalization</p>
+                </div>
+                <div class="card animate-in delay-3">
+                    <p class="text-2xl font-bold text-purple-400">15+</p>
+                    <p class="text-gray-400 text-sm">API Endpoints</p>
+                </div>
+                <div class="card animate-in delay-3">
+                    <p class="text-2xl font-bold text-pink-400">100%</p>
+                    <p class="text-gray-400 text-sm">Functional</p>
+                </div>
+            </div>
+            
+            <div class="animate-in delay-4">
+                <h3 class="text-2xl font-bold text-white mb-4">Thank You!</h3>
+                <p class="text-gray-400">Questions?</p>
+            </div>
+            
+            <div class="mt-12 animate-in delay-5">
+                <p class="text-gray-500 text-sm">GitHub: github.com/nekumartins/theatre-333</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Create navigation dots
+        const slides = document.querySelectorAll('.slide');
+        const navDots = document.getElementById('navDots');
+        
+        slides.forEach((slide, index) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            dot.onclick = () => slide.scrollIntoView({ behavior: 'smooth' });
+            navDots.appendChild(dot);
+        });
+        
+        // Update active dot on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        slides.forEach(slide => observer.observe(slide));
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const currentSlide = Array.from(slides).findIndex(slide => {
+                const rect = slide.getBoundingClientRect();
+                return rect.top >= 0 && rect.top < window.innerHeight / 2;
+            });
+            
+            if (e.key === 'ArrowDown' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                if (currentSlide < slides.length - 1) {
+                    slides[currentSlide + 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                if (currentSlide > 0) {
+                    slides[currentSlide - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

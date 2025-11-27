@@ -18,6 +18,7 @@
 - **Fixed-Length** (status codes): `VARCHAR(20)`
 - **Email**: `VARCHAR(100)`
 - **URLs**: `VARCHAR(255)`
+- **JSON Data**: `JSON` (for audit log old/new values)
 
 ### 1.3 Date/Time Types
 - **Date Only**: `DATE`
@@ -45,7 +46,37 @@ USE theatre_booking;
 
 ---
 
-### 2.2 GENRE Table
+### 2.2 ROLE Table (RBAC Support)
+```sql
+CREATE TABLE role (
+    role_id INT UNSIGNED AUTO_INCREMENT,
+    role_name VARCHAR(50) NOT NULL,
+    description TEXT,
+    can_manage_shows BOOLEAN DEFAULT FALSE,
+    can_manage_venues BOOLEAN DEFAULT FALSE,
+    can_manage_performances BOOLEAN DEFAULT FALSE,
+    can_manage_bookings BOOLEAN DEFAULT FALSE,
+    can_view_analytics BOOLEAN DEFAULT FALSE,
+    can_manage_users BOOLEAN DEFAULT FALSE,
+    can_manage_pricing BOOLEAN DEFAULT FALSE,
+    can_issue_refunds BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (role_id),
+    UNIQUE KEY uk_role_name (role_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default roles
+INSERT INTO role (role_name, description, can_manage_shows, can_manage_venues, can_manage_performances, can_manage_bookings, can_view_analytics, can_manage_users, can_manage_pricing, can_issue_refunds) VALUES
+('Admin', 'Full system administrator with all permissions', TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+('Manager', 'Theatre manager with show and booking management', TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE),
+('Staff', 'Theatre staff with limited booking access', FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
+('Customer', 'Regular customer with no administrative access', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE);
+```
+
+---
+
+### 2.3 GENRE Table
 ```sql
 CREATE TABLE genre (
     genre_id INT UNSIGNED AUTO_INCREMENT,
@@ -58,10 +89,11 @@ CREATE TABLE genre (
 
 ---
 
-### 2.3 USER Table
+### 2.4 USER Table
 ```sql
 CREATE TABLE user (
     user_id INT UNSIGNED AUTO_INCREMENT,
+    role_id INT UNSIGNED,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
@@ -76,11 +108,13 @@ CREATE TABLE user (
     registration_date DATE NOT NULL,
     email_verified BOOLEAN DEFAULT FALSE,
     account_status VARCHAR(20) NOT NULL DEFAULT 'Active',
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id),
     UNIQUE KEY uk_email (email),
     INDEX idx_email (email),
+    INDEX idx_role (role_id),
     INDEX idx_account_status (account_status),
     CONSTRAINT chk_account_status CHECK (account_status IN ('Active', 'Suspended', 'Deleted')),
     CONSTRAINT chk_email_format CHECK (email LIKE '%@%')
@@ -89,7 +123,30 @@ CREATE TABLE user (
 
 ---
 
-### 2.4 SHOW Table
+### 2.5 AUDIT_LOG Table (Audit Trail)
+```sql
+CREATE TABLE audit_log (
+    log_id INT UNSIGNED AUTO_INCREMENT,
+    user_id INT UNSIGNED,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INT UNSIGNED,
+    old_values JSON,
+    new_values JSON,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(255),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (log_id),
+    INDEX idx_user (user_id),
+    INDEX idx_entity (entity_type, entity_id),
+    INDEX idx_timestamp (timestamp),
+    INDEX idx_action (action)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+---
+
+### 2.6 SHOW Table
 ```sql
 CREATE TABLE show_table (
     show_id INT UNSIGNED AUTO_INCREMENT,
@@ -115,7 +172,7 @@ CREATE TABLE show_table (
 
 ---
 
-### 2.5 VENUE Table
+### 2.7 VENUE Table
 ```sql
 CREATE TABLE venue (
     venue_id INT UNSIGNED AUTO_INCREMENT,
@@ -138,7 +195,7 @@ CREATE TABLE venue (
 
 ---
 
-### 2.6 SEAT Table
+### 2.8 SEAT Table
 ```sql
 CREATE TABLE seat (
     seat_id INT UNSIGNED AUTO_INCREMENT,
@@ -160,7 +217,7 @@ CREATE TABLE seat (
 
 ---
 
-### 2.7 SEAT_CATEGORY_PRICING Table
+### 2.9 SEAT_CATEGORY_PRICING Table
 ```sql
 CREATE TABLE seat_category_pricing (
     category_id INT UNSIGNED AUTO_INCREMENT,
@@ -175,7 +232,7 @@ CREATE TABLE seat_category_pricing (
 
 ---
 
-### 2.8 PERFORMANCE Table
+### 2.10 PERFORMANCE Table
 ```sql
 CREATE TABLE performance (
     performance_id INT UNSIGNED AUTO_INCREMENT,
@@ -203,7 +260,7 @@ CREATE TABLE performance (
 
 ---
 
-### 2.9 PERFORMANCE_PRICING Table
+### 2.11 PERFORMANCE_PRICING Table
 ```sql
 CREATE TABLE performance_pricing (
     pricing_id INT UNSIGNED AUTO_INCREMENT,
@@ -220,7 +277,7 @@ CREATE TABLE performance_pricing (
 
 ---
 
-### 2.10 BOOKING Table
+### 2.12 BOOKING Table
 ```sql
 CREATE TABLE booking (
     booking_id INT UNSIGNED AUTO_INCREMENT,
@@ -247,7 +304,7 @@ CREATE TABLE booking (
 
 ---
 
-### 2.11 BOOKING_DETAIL Table
+### 2.13 BOOKING_DETAIL Table
 ```sql
 CREATE TABLE booking_detail (
     booking_detail_id INT UNSIGNED AUTO_INCREMENT,
@@ -266,7 +323,7 @@ CREATE TABLE booking_detail (
 
 ---
 
-### 2.12 PAYMENT Table
+### 2.14 PAYMENT Table
 ```sql
 CREATE TABLE payment (
     payment_id INT UNSIGNED AUTO_INCREMENT,
@@ -297,6 +354,22 @@ CREATE TABLE payment (
 ### Apply Foreign Keys After Table Creation
 
 ```sql
+-- USER Table Foreign Keys
+ALTER TABLE user
+ADD CONSTRAINT fk_user_role 
+    FOREIGN KEY (role_id) 
+    REFERENCES role(role_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
+
+-- AUDIT_LOG Table Foreign Keys
+ALTER TABLE audit_log
+ADD CONSTRAINT fk_audit_user 
+    FOREIGN KEY (user_id) 
+    REFERENCES user(user_id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE;
+
 -- SHOW Table Foreign Keys
 ALTER TABLE show_table
 ADD CONSTRAINT fk_show_genre 
@@ -391,18 +464,36 @@ INSERT INTO genre (genre_name, description) VALUES
 
 ---
 
-### 4.2 Insert Users
+### 4.2 Insert Users with Roles
 ```sql
-INSERT INTO user (first_name, last_name, email, phone, password_hash, date_of_birth, city, country, registration_date) VALUES
-('John', 'Doe', 'john.doe@email.com', '+1234567890', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Ga', '1990-05-15', 'New York', 'USA', '2024-01-10'),
-('Jane', 'Smith', 'jane.smith@email.com', '+1234567891', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gb', '1985-08-22', 'Los Angeles', 'USA', '2024-02-15'),
-('Michael', 'Johnson', 'michael.j@email.com', '+1234567892', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gc', '1992-11-30', 'Chicago', 'USA', '2024-03-20'),
-('Emily', 'Brown', 'emily.brown@email.com', '+1234567893', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gd', '1988-03-12', 'London', 'UK', '2024-04-05');
+-- Insert admin user with Admin role
+INSERT INTO user (role_id, first_name, last_name, email, phone, password_hash, date_of_birth, city, country, registration_date, is_admin) VALUES
+(1, 'Admin', 'User', 'admin@theatre.com', '+1234567890', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Ga', '1985-01-01', 'New York', 'USA', '2024-01-01', TRUE);
+
+-- Insert regular users with Customer role
+INSERT INTO user (role_id, first_name, last_name, email, phone, password_hash, date_of_birth, city, country, registration_date, is_admin) VALUES
+(4, 'John', 'Doe', 'john.doe@email.com', '+1234567891', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gb', '1990-05-15', 'New York', 'USA', '2024-01-10', FALSE),
+(4, 'Jane', 'Smith', 'jane.smith@email.com', '+1234567892', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gc', '1985-08-22', 'Los Angeles', 'USA', '2024-02-15', FALSE),
+(4, 'Michael', 'Johnson', 'michael.j@email.com', '+1234567893', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gd', '1992-11-30', 'Chicago', 'USA', '2024-03-20', FALSE),
+(4, 'Emily', 'Brown', 'emily.brown@email.com', '+1234567894', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Ge', '1988-03-12', 'London', 'UK', '2024-04-05', FALSE);
+
+-- Insert staff user with Staff role
+INSERT INTO user (role_id, first_name, last_name, email, phone, password_hash, date_of_birth, city, country, registration_date, is_admin) VALUES
+(3, 'Staff', 'Member', 'staff@theatre.com', '+1234567895', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYIeWU6O3Gf', '1990-06-15', 'New York', 'USA', '2024-01-05', FALSE);
 ```
 
 ---
 
-### 4.3 Insert Venues
+### 4.3 Insert Sample Audit Log Entry
+```sql
+INSERT INTO audit_log (user_id, action, entity_type, entity_id, old_values, new_values, ip_address, user_agent) VALUES
+(1, 'CREATE', 'SHOW', 1, NULL, '{"title": "The Phantom of Broadway", "genre_id": 3}', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'),
+(1, 'UPDATE', 'USER', 2, '{"account_status": "Active"}', '{"account_status": "Suspended"}', '192.168.1.100', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+```
+
+---
+
+### 4.4 Insert Venues
 ```sql
 INSERT INTO venue (venue_name, address_line1, city, postal_code, country, total_capacity, phone, facilities) VALUES
 ('Grand Theatre', '123 Broadway Street', 'New York', '10001', 'USA', 500, '+1-555-0100', 'Wheelchair accessible, parking available, restaurant on-site'),
@@ -412,7 +503,7 @@ INSERT INTO venue (venue_name, address_line1, city, postal_code, country, total_
 
 ---
 
-### 4.4 Insert Shows
+### 4.5 Insert Shows
 ```sql
 INSERT INTO show_table (title, description, genre_id, duration_minutes, language, age_rating, producer, director, show_status) VALUES
 ('The Phantom of Broadway', 'A timeless tale of love, mystery, and music set beneath a grand opera house', 3, 150, 'English', 'PG-13', 'Andrew Lloyd Productions', 'Harold Prince', 'Active'),
@@ -423,7 +514,7 @@ INSERT INTO show_table (title, description, genre_id, duration_minutes, language
 
 ---
 
-### 4.5 Insert Seats (Sample for Grand Theatre)
+### 4.6 Insert Seats (Sample for Grand Theatre)
 ```sql
 -- VIP Section (Rows A-B)
 INSERT INTO seat (venue_id, row_number, seat_number, section, seat_category, is_accessible) VALUES
@@ -458,7 +549,7 @@ INSERT INTO seat (venue_id, row_number, seat_number, section, seat_category, is_
 
 ---
 
-### 4.6 Insert Seat Category Pricing
+### 4.7 Insert Seat Category Pricing
 ```sql
 INSERT INTO seat_category_pricing (category_name, base_price, description) VALUES
 ('VIP', 150.00, 'Best seats in the house with premium amenities'),
@@ -470,7 +561,7 @@ INSERT INTO seat_category_pricing (category_name, base_price, description) VALUE
 
 ---
 
-### 4.7 Insert Performances
+### 4.8 Insert Performances
 ```sql
 INSERT INTO performance (show_id, venue_id, performance_date, start_time, end_time, total_seats, available_seats, performance_status) VALUES
 (1, 1, '2025-12-15', '19:30:00', '22:00:00', 17, 17, 'Scheduled'),
@@ -481,7 +572,7 @@ INSERT INTO performance (show_id, venue_id, performance_date, start_time, end_ti
 
 ---
 
-### 4.8 Insert Performance Pricing
+### 4.9 Insert Performance Pricing
 ```sql
 -- Performance 1: The Phantom of Broadway (2025-12-15)
 INSERT INTO performance_pricing (performance_id, seat_category, price) VALUES
@@ -512,11 +603,11 @@ INSERT INTO performance_pricing (performance_id, seat_category, price) VALUES
 
 ---
 
-### 4.9 Insert Sample Booking
+### 4.10 Insert Sample Booking
 ```sql
 -- Booking by John Doe for Performance 1
 INSERT INTO booking (user_id, performance_id, booking_reference, total_amount, booking_status) VALUES
-(1, 1, 'BK20251124001', 300.00, 'Confirmed');
+(2, 1, 'BK20251124001', 300.00, 'Confirmed');
 
 -- Booking details for 2 VIP seats
 INSERT INTO booking_detail (booking_id, seat_id, seat_price, row_number, seat_number, seat_category) VALUES
@@ -529,7 +620,7 @@ UPDATE performance SET available_seats = available_seats - 2 WHERE performance_i
 
 ---
 
-### 4.10 Insert Sample Payment
+### 4.11 Insert Sample Payment
 ```sql
 INSERT INTO payment (booking_id, payment_amount, payment_method, transaction_id, payment_status, card_last_four) VALUES
 (1, 300.00, 'Credit Card', 'TXN123456789', 'Completed', '4242');
@@ -545,7 +636,9 @@ INSERT INTO payment (booking_id, payment_amount, payment_method, transaction_id,
 SHOW TABLES;
 
 -- Check table structure
+DESCRIBE role;
 DESCRIBE user;
+DESCRIBE audit_log;
 DESCRIBE booking;
 DESCRIBE performance;
 
@@ -580,12 +673,79 @@ SELECT
     (p.total_seats - p.available_seats) AS seats_booked
 FROM performance p
 JOIN show_table s ON p.show_id = s.show_id;
+
+-- Check user roles
+SELECT u.email, u.is_admin, r.role_name, r.can_manage_shows, r.can_manage_users
+FROM user u
+LEFT JOIN role r ON u.role_id = r.role_id;
+
+-- View audit log entries
+SELECT al.log_id, u.email AS user_email, al.action, al.entity_type, al.entity_id, al.timestamp
+FROM audit_log al
+LEFT JOIN user u ON al.user_id = u.user_id
+ORDER BY al.timestamp DESC;
 ```
 
 ---
 
+### 5.3 RBAC Permission Check Queries
+```sql
+-- Check if user has specific permission
+SELECT 
+    u.email,
+    r.role_name,
+    r.can_manage_shows,
+    r.can_issue_refunds
+FROM user u
+JOIN role r ON u.role_id = r.role_id
+WHERE u.user_id = ?;
+
+-- List all users with their permissions
+SELECT 
+    u.user_id,
+    u.email,
+    u.is_admin,
+    r.role_name,
+    r.can_manage_shows,
+    r.can_manage_venues,
+    r.can_manage_performances,
+    r.can_manage_bookings,
+    r.can_view_analytics,
+    r.can_manage_users,
+    r.can_manage_pricing,
+    r.can_issue_refunds
+FROM user u
+LEFT JOIN role r ON u.role_id = r.role_id
+ORDER BY r.role_name, u.email;
+```
+
+---
+
+## 6. Table Summary
+
+| # | Table Name            | Purpose                              | Records Est. |
+|---|----------------------|--------------------------------------|--------------|
+| 1 | role                 | RBAC roles with permissions          | 4+           |
+| 2 | user                 | Customer and admin accounts          | 1,000+       |
+| 3 | audit_log            | System audit trail                   | 10,000+      |
+| 4 | genre                | Show categories                      | 10           |
+| 5 | show_table           | Theatre productions                  | 50           |
+| 6 | venue                | Theatre locations                    | 5            |
+| 7 | seat                 | Individual seats per venue           | 2,000+       |
+| 8 | seat_category_pricing| Base pricing tiers                   | 5            |
+| 9 | performance          | Scheduled show instances             | 200          |
+| 10| performance_pricing  | Dynamic pricing per performance      | 800          |
+| 11| booking              | Customer reservations                | 5,000+       |
+| 12| booking_detail       | Individual seat assignments          | 15,000+      |
+| 13| payment              | Transaction records                  | 5,000+       |
+
+**Total Tables**: 13
+
+---
+
 ## Document Control
-- **Version**: 1.0
-- **Date**: November 24, 2025
+- **Version**: 2.0
+- **Date**: November 27, 2025
 - **Database**: MySQL 8.0+
+- **Total Tables**: 13 (including ROLE and AUDIT_LOG)
 - **Purpose**: Academic Database Design - Physical Implementation

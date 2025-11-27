@@ -1,15 +1,40 @@
 # Online Theatre Booking System - Logical Data Model
 
-## Relational Schema with Functional Dependencies and Normalization
+## Relational Schema Design with Normalization Analysis
 
 ---
 
-## 1. Relational Tables (Schema)
+## 1. Relational Tables (Logical Schema)
 
-### 1.1 USER
+### 1.1 ROLE
+```
+ROLE(
+    role_id INT,
+    role_name VARCHAR(50),
+    description TEXT,
+    can_manage_shows BOOLEAN,
+    can_manage_venues BOOLEAN,
+    can_manage_performances BOOLEAN,
+    can_manage_bookings BOOLEAN,
+    can_view_analytics BOOLEAN,
+    can_manage_users BOOLEAN,
+    can_manage_pricing BOOLEAN,
+    can_issue_refunds BOOLEAN,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+**Primary Key**: role_id  
+**Unique Keys**: role_name
+
+---
+
+### 1.2 USER
 ```
 USER(
     user_id INT,
+    role_id INT,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(100),
@@ -24,23 +49,42 @@ USER(
     registration_date DATE,
     email_verified BOOLEAN,
     account_status VARCHAR(20),
+    is_admin BOOLEAN,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 )
 ```
 
 **Primary Key**: user_id  
-**Unique Keys**: email  
-**Data Types Justification**:
-- `user_id`: INT for efficient indexing and joins
-- `email`: VARCHAR(100) to accommodate long email addresses
-- `password_hash`: VARCHAR(255) for bcrypt/Argon2 hashes
-- `account_status`: VARCHAR(20) for enumerated values
-- Timestamps for audit trail
+**Foreign Keys**: 
+- role_id REFERENCES ROLE(role_id)
+**Unique Keys**: email
 
 ---
 
-### 1.2 GENRE
+### 1.3 AUDIT_LOG
+```
+AUDIT_LOG(
+    log_id INT,
+    user_id INT,
+    action VARCHAR(100),
+    entity_type VARCHAR(50),
+    entity_id INT,
+    old_values JSON,
+    new_values JSON,
+    ip_address VARCHAR(45),
+    user_agent VARCHAR(255),
+    timestamp TIMESTAMP
+)
+```
+
+**Primary Key**: log_id  
+**Foreign Keys**: 
+- user_id REFERENCES USER(user_id)
+
+---
+
+### 1.4 GENRE
 ```
 GENRE(
     genre_id INT,
@@ -54,7 +98,7 @@ GENRE(
 
 ---
 
-### 1.3 SHOW
+### 1.5 SHOW
 ```
 SHOW(
     show_id INT,
@@ -79,7 +123,7 @@ SHOW(
 
 ---
 
-### 1.4 VENUE
+### 1.6 VENUE
 ```
 VENUE(
     venue_id INT,
@@ -98,11 +142,11 @@ VENUE(
 ```
 
 **Primary Key**: venue_id  
-**Unique Keys**: (venue_name, city) - assuming unique venue names per city
+**Unique Keys**: (venue_name, city)
 
 ---
 
-### 1.5 SEAT
+### 1.7 SEAT
 ```
 SEAT(
     seat_id INT,
@@ -124,7 +168,7 @@ SEAT(
 
 ---
 
-### 1.6 SEAT_CATEGORY_PRICING
+### 1.8 SEAT_CATEGORY_PRICING
 ```
 SEAT_CATEGORY_PRICING(
     category_id INT,
@@ -139,7 +183,7 @@ SEAT_CATEGORY_PRICING(
 
 ---
 
-### 1.7 PERFORMANCE
+### 1.9 PERFORMANCE
 ```
 PERFORMANCE(
     performance_id INT,
@@ -164,7 +208,7 @@ PERFORMANCE(
 
 ---
 
-### 1.8 PERFORMANCE_PRICING
+### 1.10 PERFORMANCE_PRICING
 ```
 PERFORMANCE_PRICING(
     pricing_id INT,
@@ -182,7 +226,7 @@ PERFORMANCE_PRICING(
 
 ---
 
-### 1.9 BOOKING
+### 1.11 BOOKING
 ```
 BOOKING(
     booking_id INT,
@@ -207,7 +251,7 @@ BOOKING(
 
 ---
 
-### 1.10 BOOKING_DETAIL
+### 1.12 BOOKING_DETAIL
 ```
 BOOKING_DETAIL(
     booking_detail_id INT,
@@ -228,7 +272,7 @@ BOOKING_DETAIL(
 
 ---
 
-### 1.11 PAYMENT
+### 1.13 PAYMENT
 ```
 PAYMENT(
     payment_id INT,
@@ -254,23 +298,60 @@ PAYMENT(
 
 ## 2. Functional Dependencies
 
-### 2.1 USER Table
+### 2.1 ROLE Table
 ```
-FD1: user_id → first_name, last_name, email, phone, password_hash, date_of_birth, 
-              address_line1, address_line2, city, postal_code, country, 
-              registration_date, email_verified, account_status, created_at, updated_at
+FD1: role_id → role_name, description, can_manage_shows, can_manage_venues, 
+              can_manage_performances, can_manage_bookings, can_view_analytics, 
+              can_manage_users, can_manage_pricing, can_issue_refunds, 
+              created_at, updated_at
 
-FD2: email → user_id (since email is unique)
+FD2: role_name → role_id (since role_name is unique)
 ```
 
 **Analysis**: 
-- All non-key attributes are fully functionally dependent on user_id
+- All non-key attributes are fully functionally dependent on role_id
 - No partial or transitive dependencies
 - **Already in 3NF**
 
 ---
 
-### 2.2 GENRE Table
+### 2.2 USER Table
+```
+FD1: user_id → role_id, first_name, last_name, email, phone, password_hash, 
+              date_of_birth, address_line1, address_line2, city, postal_code, 
+              country, registration_date, email_verified, account_status, 
+              is_admin, created_at, updated_at
+
+FD2: email → user_id (since email is unique)
+
+FD3: role_id → role_name, permissions... (from ROLE table)
+```
+
+**Analysis**: 
+- All non-key attributes are fully functionally dependent on user_id
+- role_id is a foreign key; role details are stored in ROLE table
+- No partial or transitive dependencies
+- **Already in 3NF**
+
+---
+
+### 2.3 AUDIT_LOG Table
+```
+FD1: log_id → user_id, action, entity_type, entity_id, old_values, 
+              new_values, ip_address, user_agent, timestamp
+
+FD2: user_id → user details... (from USER table)
+```
+
+**Analysis**: 
+- All attributes depend on log_id
+- user_id is a foreign key referencing USER
+- No transitive dependencies within the table
+- **Already in 3NF**
+
+---
+
+### 2.4 GENRE Table
 ```
 FD1: genre_id → genre_name, description
 FD2: genre_name → genre_id (since genre_name is unique)
@@ -282,7 +363,7 @@ FD2: genre_name → genre_id (since genre_name is unique)
 
 ---
 
-### 2.3 SHOW Table
+### 2.5 SHOW Table
 ```
 FD1: show_id → title, description, genre_id, duration_minutes, language, 
               age_rating, poster_url, producer, director, show_status, 
@@ -298,7 +379,7 @@ FD2: genre_id → genre_name, description (from GENRE table)
 
 ---
 
-### 2.4 VENUE Table
+### 2.6 VENUE Table
 ```
 FD1: venue_id → venue_name, address_line1, address_line2, city, postal_code, 
                country, total_capacity, phone, facilities, created_at, updated_at
@@ -313,7 +394,7 @@ FD2: (venue_name, city) → venue_id (composite unique key)
 
 ---
 
-### 2.5 SEAT Table
+### 2.7 SEAT Table
 ```
 FD1: seat_id → venue_id, row_number, seat_number, section, seat_category, 
               is_accessible, is_active, created_at
@@ -329,7 +410,7 @@ FD2: (venue_id, row_number, seat_number) → seat_id
 
 ---
 
-### 2.6 SEAT_CATEGORY_PRICING Table
+### 2.8 SEAT_CATEGORY_PRICING Table
 ```
 FD1: category_id → category_name, base_price, description
 FD2: category_name → category_id
@@ -341,7 +422,7 @@ FD2: category_name → category_id
 
 ---
 
-### 2.7 PERFORMANCE Table
+### 2.9 PERFORMANCE Table
 ```
 FD1: performance_id → show_id, venue_id, performance_date, start_time, end_time, 
                      total_seats, available_seats, performance_status, 
@@ -359,7 +440,7 @@ FD3: venue_id → venue_name, capacity... (from VENUE)
 
 ---
 
-### 2.8 PERFORMANCE_PRICING Table
+### 2.10 PERFORMANCE_PRICING Table
 ```
 FD1: pricing_id → performance_id, seat_category, price, created_at
 FD2: (performance_id, seat_category) → pricing_id, price
@@ -372,7 +453,7 @@ FD2: (performance_id, seat_category) → pricing_id, price
 
 ---
 
-### 2.9 BOOKING Table
+### 2.11 BOOKING Table
 ```
 FD1: booking_id → user_id, performance_id, booking_reference, booking_date, 
                  total_amount, booking_status, cancellation_date, 
@@ -388,7 +469,7 @@ FD2: booking_reference → booking_id (unique reference)
 
 ---
 
-### 2.10 BOOKING_DETAIL Table
+### 2.12 BOOKING_DETAIL Table
 ```
 FD1: booking_detail_id → booking_id, seat_id, seat_price, row_number, 
                         seat_number, seat_category
@@ -421,7 +502,7 @@ This would be in strict 3NF, but requires JOIN with SEAT for every booking detai
 
 ---
 
-### 2.11 PAYMENT Table
+### 2.13 PAYMENT Table
 ```
 FD1: payment_id → booking_id, payment_amount, payment_method, payment_date, 
                  transaction_id, payment_status, gateway_response, 
@@ -441,7 +522,9 @@ FD1: payment_id → booking_id, payment_amount, payment_method, payment_date,
 **Requirement**: All attributes must contain atomic values; no repeating groups.
 
 **Verification**:
+- ✅ ROLE: All attributes are atomic (boolean permissions are single values)
 - ✅ USER: All attributes are atomic (no multi-valued attributes)
+- ✅ AUDIT_LOG: JSON fields store structured data (acceptable in modern RDBMS)
 - ✅ SHOW: All attributes are atomic
 - ✅ BOOKING: All attributes are atomic
 - ✅ BOOKING_DETAIL: Separate table created to eliminate repeating groups of seats in a booking
@@ -457,7 +540,7 @@ FD1: payment_id → booking_id, payment_amount, payment_method, payment_date,
 **Analysis**:
 
 **Tables with Single-Attribute Primary Keys**:
-- USER, GENRE, SHOW, VENUE, SEAT, PERFORMANCE, BOOKING, PAYMENT, BOOKING_DETAIL, PERFORMANCE_PRICING
+- ROLE, USER, AUDIT_LOG, GENRE, SHOW, VENUE, SEAT, PERFORMANCE, BOOKING, PAYMENT, BOOKING_DETAIL, PERFORMANCE_PRICING, SEAT_CATEGORY_PRICING
 - No partial dependencies possible (single-attribute PK)
 - ✅ All satisfy 2NF
 
@@ -475,9 +558,20 @@ FD1: payment_id → booking_id, payment_amount, payment_method, payment_date,
 
 **Analysis**:
 
+**ROLE Table**:
+- No transitive dependencies
+- Boolean permission flags are independent attributes
+- ✅ 3NF
+
 **USER Table**:
 - No transitive dependencies
+- role_id is a foreign key; role details stored in ROLE table
 - city → postal_code? No, multiple cities can have overlapping postal codes in different countries
+- ✅ 3NF
+
+**AUDIT_LOG Table**:
+- No transitive dependencies
+- JSON fields store historical snapshots, not causing functional dependencies
 - ✅ 3NF
 
 **SHOW Table**:
@@ -519,7 +613,9 @@ FD1: payment_id → booking_id, payment_amount, payment_method, payment_date,
 
 | Table                  | 1NF | 2NF | 3NF | Notes                                      |
 |------------------------|-----|-----|-----|--------------------------------------------|
+| ROLE                   | ✅  | ✅  | ✅  | Fully normalized (RBAC support)            |
 | USER                   | ✅  | ✅  | ✅  | Fully normalized                           |
+| AUDIT_LOG              | ✅  | ✅  | ✅  | Fully normalized (audit trail)             |
 | GENRE                  | ✅  | ✅  | ✅  | Fully normalized                           |
 | SHOW                   | ✅  | ✅  | ✅  | Fully normalized                           |
 | VENUE                  | ✅  | ✅  | ✅  | Fully normalized                           |
@@ -531,6 +627,8 @@ FD1: payment_id → booking_id, payment_amount, payment_method, payment_date,
 | BOOKING_DETAIL         | ✅  | ✅  | ⚠️  | Denormalized for performance (acceptable)  |
 | PAYMENT                | ✅  | ✅  | ✅  | Fully normalized                           |
 
+**Total Tables**: 13
+
 ---
 
 ## 5. Referential Integrity Constraints
@@ -538,6 +636,14 @@ FD1: payment_id → booking_id, payment_amount, payment_method, payment_date,
 ### 5.1 Foreign Key Constraints
 
 ```
+USER.role_id → ROLE.role_id
+    ON DELETE SET NULL (user keeps account if role deleted)
+    ON UPDATE CASCADE
+
+AUDIT_LOG.user_id → USER.user_id
+    ON DELETE SET NULL (preserve audit logs even if user deleted)
+    ON UPDATE CASCADE
+
 SHOW.genre_id → GENRE.genre_id
     ON DELETE RESTRICT (cannot delete genre if shows exist)
     ON UPDATE CASCADE
@@ -585,9 +691,16 @@ PAYMENT.booking_id → BOOKING.booking_id
 
 ### 6.1 Domain Constraints
 ```sql
+-- ROLE
+CHECK (role_name IS NOT NULL)
+
 -- USER
 CHECK (email LIKE '%@%')
 CHECK (account_status IN ('Active', 'Suspended', 'Deleted'))
+
+-- AUDIT_LOG
+CHECK (action IS NOT NULL)
+CHECK (entity_type IS NOT NULL)
 
 -- SHOW
 CHECK (duration_minutes > 0)
@@ -620,23 +733,34 @@ CHECK (payment_status IN ('Pending', 'Completed', 'Failed', 'Refunded'))
 
 ### 6.2 Complex Business Rules (Enforced via Triggers/Application Logic)
 
-1. **Seat Availability**: 
+1. **Role-Based Access Control (RBAC)**: 
+   - User permissions determined by their assigned role
+   - Admin users (is_admin=TRUE) have full system access
+   - Role permissions are granular (8 permission flags)
+
+2. **Audit Logging**:
+   - All admin/staff actions are logged to AUDIT_LOG
+   - old_values and new_values stored as JSON for change tracking
+   - IP address and user agent captured for security
+
+3. **Seat Availability**: 
    - A seat can only be booked once per performance
    - Requires checking existing BOOKING_DETAIL records for the same (seat_id, performance_id)
 
-2. **Booking Expiration**:
+4. **Booking Expiration**:
    - Bookings with status 'Pending' must be paid within 15 minutes
    - Trigger/scheduled job to update status to 'Expired' and release seats
 
-3. **Available Seats Update**:
+5. **Available Seats Update**:
    - When booking is confirmed, decrement PERFORMANCE.available_seats
    - When booking is cancelled, increment PERFORMANCE.available_seats
 
-4. **Payment-Booking Status Sync**:
+6. **Payment-Booking Status Sync**:
    - When PAYMENT.payment_status = 'Completed', update BOOKING.booking_status = 'Confirmed'
 
-5. **Cancellation Policy**:
+7. **Cancellation Policy**:
    - Bookings can only be cancelled if performance_date - CURRENT_DATE >= 1
+   - Only users with can_issue_refunds permission can process refunds
 
 ---
 
@@ -645,9 +769,19 @@ CHECK (payment_status IN ('Pending', 'Completed', 'Failed', 'Refunded'))
 ### 7.1 Recommended Indexes
 
 ```sql
+-- ROLE
+CREATE INDEX idx_role_name ON ROLE(role_name);
+
 -- USER
 CREATE INDEX idx_user_email ON USER(email);
+CREATE INDEX idx_user_role ON USER(role_id);
 CREATE INDEX idx_user_account_status ON USER(account_status);
+
+-- AUDIT_LOG
+CREATE INDEX idx_audit_user ON AUDIT_LOG(user_id);
+CREATE INDEX idx_audit_entity ON AUDIT_LOG(entity_type, entity_id);
+CREATE INDEX idx_audit_timestamp ON AUDIT_LOG(timestamp);
+CREATE INDEX idx_audit_action ON AUDIT_LOG(action);
 
 -- SHOW
 CREATE INDEX idx_show_genre ON SHOW(genre_id);
@@ -683,8 +817,24 @@ CREATE INDEX idx_payment_date ON PAYMENT(payment_date);
 
 ---
 
+## 8. RBAC Permission Matrix
+
+| Permission              | Admin | Manager | Staff | Customer |
+|-------------------------|-------|---------|-------|----------|
+| can_manage_shows        | ✅    | ✅      | ❌    | ❌       |
+| can_manage_venues       | ✅    | ✅      | ❌    | ❌       |
+| can_manage_performances | ✅    | ✅      | ✅    | ❌       |
+| can_manage_bookings     | ✅    | ✅      | ✅    | ❌       |
+| can_view_analytics      | ✅    | ✅      | ❌    | ❌       |
+| can_manage_users        | ✅    | ❌      | ❌    | ❌       |
+| can_manage_pricing      | ✅    | ✅      | ❌    | ❌       |
+| can_issue_refunds       | ✅    | ✅      | ❌    | ❌       |
+
+---
+
 ## Document Control
-- **Version**: 1.0
-- **Date**: November 24, 2025
+- **Version**: 2.0
+- **Date**: November 27, 2025
+- **Total Tables**: 13 (including ROLE and AUDIT_LOG for RBAC)
 - **Normalization Level**: 3NF (with one documented denormalization)
 - **Purpose**: Academic Database Design - Logical Model

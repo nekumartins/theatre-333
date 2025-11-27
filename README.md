@@ -1,7 +1,24 @@
-# Online Theatre Booking System - Complete Database Design Documentation
+# 🎭 Online Theatre Booking System - Complete Database Design & Implementation
+
+[![GitHub](https://img.shields.io/badge/GitHub-nekumartins%2Ftheatre--333-purple)](https://github.com/nekumartins/theatre-333)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green)](https://fastapi.tiangolo.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange)](https://mysql.com)
 
 ## Project Overview
-This repository contains comprehensive documentation for an **Online Theatre Booking System** database design project. The documentation follows academic standards for Systems Analysis and Design, covering all phases from business requirements through application implementation.
+A fully functional **Online Theatre Booking System** with complete database design documentation and working web application. This project demonstrates Systems Analysis and Design principles from business requirements through production-ready implementation.
+
+### 🌐 Live Features
+- ✅ User registration & JWT authentication
+- ✅ Browse shows & performances
+- ✅ Interactive seat selection (491 seats)
+- ✅ Complete booking workflow
+- ✅ Payment processing
+- ✅ E-Ticket generation with QR codes
+- ✅ Admin panel for management
+- ✅ Role-based access control (RBAC)
+
+---
 
 ## 📚 Documentation Structure
 
@@ -14,12 +31,12 @@ Comprehensive analysis of business processes, stakeholders, and data requirement
 - Non-functional requirements
 
 ### 2. [Conceptual Data Model (ERD)](02_CONCEPTUAL_MODEL_ERD.md)
-Entity-Relationship Diagram specifications using Oracle ERDish notation:
-- 11 entities with complete attribute definitions
+Entity-Relationship Diagram specifications using Oracle ERDish / Crow's Foot notation:
+- 13 entities with complete attribute definitions (including ROLE and AUDIT_LOG for RBAC)
 - Primary and foreign key specifications
 - Relationship definitions with cardinality and optionality
 - Business rules reflected in the ERD
-- Drawing instructions for Visio/Draw.io
+- **SVG ERD diagram included**: `presentation/erd_diagram.svg`
 
 ### 3. [Logical Data Model](03_LOGICAL_MODEL.md)
 Relational schema with normalization analysis:
@@ -38,188 +55,279 @@ MySQL implementation with complete SQL code:
 - Data type recommendations
 
 ### 5. [Application Implementation Guide](05_APPLICATION_IMPLEMENTATION.md)
-FastAPI and HTML/Tailwind integration guidance:
+FastAPI and HTML/Tailwind integration:
 - Project structure and technology stack
 - Database connection setup
 - SQLAlchemy models and schemas
-- Key API endpoints with code examples
+- 15+ API endpoints with code examples
 - Frontend templates with Tailwind CSS
 - Essential SQL queries with explanations
 - Security best practices
 
+### 6. [Presentation Materials](presentation/)
+- `index.html` - Interactive HTML presentation (15 slides)
+- `Theatre_Booking_System.pptx` - PowerPoint presentation
+- `erd_diagram.svg` - Crow's Foot ERD diagram
+
 ## 🎯 Key Features
 
 ### Database Design
-- **11 normalized tables** (3NF compliance)
+- **13 normalized tables** (3NF compliance)
+- **Role-Based Access Control (RBAC)** with granular permissions
+- **Audit logging** for admin/staff actions
 - **Dynamic pricing** support per performance
-- **Seat management** with venue layouts
+- **Seat management** with 5 categories (VIP, Premium, Standard, Economy, Accessible)
 - **Booking workflow** with payment tracking
-- **User management** with authentication
+- **User management** with JWT authentication & RBAC
 
-### Core Entities
-1. **USER** - Customer accounts and authentication
-2. **GENRE** - Show categorization
-3. **SHOW** - Theatre productions
-4. **VENUE** - Theatre locations
-5. **SEAT** - Venue seating configuration
-6. **PERFORMANCE** - Scheduled show instances
-7. **PERFORMANCE_PRICING** - Dynamic pricing per performance
-8. **BOOKING** - Customer reservations
-9. **BOOKING_DETAIL** - Individual seat assignments
-10. **PAYMENT** - Transaction records
-11. **SEAT_CATEGORY_PRICING** - Base pricing reference
+### Core Entities (13 Tables)
+| Entity | Description |
+|--------|-------------|
+| **ROLES** | RBAC roles with granular permissions |
+| **USERS** | Customer accounts with authentication & role assignment |
+| **AUDIT_LOGS** | System audit trail for admin actions |
+| **GENRES** | Show categorization |
+| **SHOWS** | Theatre productions |
+| **VENUES** | Theatre locations |
+| **SEATS** | Venue seating (491 seats per venue) |
+| **SEAT_CATEGORY_PRICING** | Pricing tiers with base prices |
+| **PERFORMANCES** | Scheduled show instances |
+| **PERFORMANCE_PRICING** | Dynamic pricing per performance |
+| **BOOKINGS** | Customer reservations |
+| **BOOKING_DETAILS** | Individual seat assignments |
+| **PAYMENTS** | Transaction records |
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - MySQL 8.0+
 - Python 3.9+
-- FastAPI framework
-- Node.js (for Tailwind CSS)
+- pip (Python package manager)
 
 ### Database Setup
 ```bash
-# Create database
-mysql -u root -p < 04_PHYSICAL_MODEL_SQL.md
+# 1. Create MySQL database
+mysql -u root -p -e "CREATE DATABASE theatre_booking CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-# Run the SQL commands from section 2 and 3 of the physical model document
+# 2. Update database credentials in backend/app/database.py
+# DATABASE_URL = "mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/theatre_booking"
 ```
 
 ### Application Setup
 ```bash
-# Install Python dependencies
-pip install fastapi sqlalchemy pymysql python-dotenv passlib python-jose
+# 1. Navigate to backend directory
+cd backend
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your database credentials
+# 2. Create virtual environment
+python -m venv data333
+.\data333\Scripts\Activate.ps1   # Windows PowerShell
+# source data333/bin/activate    # Linux/Mac
 
-# Run the FastAPI application
-uvicorn app.main:app --reload
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Initialize database with sample data
+python init_db.py
+
+# 5. Run the server
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
-## 📊 Sample Queries
+### Access the Application
+- **Frontend**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **Admin Panel**: http://localhost:8000/admin (requires admin account)
 
-### Get Available Performances
+---
+
+## 📊 API Endpoints
+
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | User registration |
+| POST | `/api/auth/login` | User login (returns JWT) |
+| GET | `/api/profile/me` | Get current user profile |
+| PUT | `/api/profile/me` | Update user profile |
+
+### Shows & Performances
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/shows` | List all shows |
+| GET | `/api/shows/{id}` | Get show details |
+| GET | `/api/performances/show/{show_id}` | Get performances for show |
+| GET | `/api/performances/{id}/seats` | Get available seats |
+
+### Bookings & Payments
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/bookings` | Create booking |
+| GET | `/api/bookings/my-bookings` | User's booking history |
+| GET | `/api/bookings/{id}` | Get booking details |
+| POST | `/api/payments` | Process payment |
+
+### Sample Queries
+
+**Get Available Performances:**
 ```sql
-SELECT p.*, s.title, v.venue_name
-FROM performance p
-JOIN show_table s ON p.show_id = s.show_id
-JOIN venue v ON p.venue_id = v.venue_id
+SELECT p.*, s.title, v.name as venue_name
+FROM performances p
+JOIN shows s ON p.show_id = s.show_id
+JOIN venues v ON s.venue_id = v.venue_id
 WHERE p.performance_date >= CURDATE()
-  AND p.available_seats > 0;
+  AND p.available_seats > 0
+  AND p.is_active = TRUE;
 ```
 
-### User Booking History
+**User Booking History:**
 ```sql
-SELECT b.booking_reference, s.title, p.performance_date, b.total_amount
-FROM booking b
-JOIN performance p ON b.performance_id = p.performance_id
-JOIN show_table s ON p.show_id = s.show_id
+SELECT b.booking_reference, s.title, p.performance_date, b.total_amount, b.status
+FROM bookings b
+JOIN performances p ON b.performance_id = p.performance_id
+JOIN shows s ON p.show_id = s.show_id
 WHERE b.user_id = ?
 ORDER BY b.booking_date DESC;
 ```
 
+---
+
 ## 🔒 Security Features
-- Bcrypt password hashing
-- JWT authentication
-- SQL injection prevention (parameterized queries)
-- PCI DSS compliance for payments
-- HTTPS enforcement
+- ✅ Bcrypt password hashing
+- ✅ JWT authentication with expiration
+- ✅ Role-based access control (Admin/User)
+- ✅ SQL injection prevention (SQLAlchemy ORM)
+- ✅ Input validation (Pydantic schemas)
+- ✅ CORS configuration
+- ✅ Protected API routes
 
-## 📈 Business Rules Implemented
-
-1. **Seat Uniqueness**: Each seat can only be booked once per performance
-2. **Booking Expiration**: Pending bookings expire after 15 minutes
-3. **Cancellation Policy**: Bookings can be cancelled 24 hours before performance
-4. **Dynamic Pricing**: Prices vary by performance and seat category
-5. **Seat Availability**: Real-time tracking of available seats
-
-## 🎓 Academic Compliance
-
-This project meets university-level requirements for:
-- ✅ Business analysis and requirements gathering
-- ✅ Conceptual modeling (ERD with Oracle notation)
-- ✅ Logical modeling (relational schema + normalization)
-- ✅ Physical modeling (MySQL implementation)
-- ✅ Application integration (FastAPI + HTML/Tailwind)
-
-## 📝 Documentation Standards
-
-All documentation follows:
-- Clear section numbering
-- Consistent terminology
-- Academic writing style
-- Complete code examples
-- Practical implementation guidance
+---
 
 ## 🛠️ Technology Stack
 
-**Backend:**
-- FastAPI (Python web framework)
-- SQLAlchemy (ORM)
-- MySQL (Database)
-- JWT (Authentication)
+| Layer | Technology |
+|-------|------------|
+| **Backend Framework** | FastAPI (Python 3.9+) |
+| **Database** | MySQL 8.0 |
+| **ORM** | SQLAlchemy 2.0 |
+| **Migrations** | Alembic |
+| **Authentication** | JWT (python-jose) |
+| **Password Hashing** | bcrypt (passlib) |
+| **Frontend** | HTML5, Tailwind CSS, JavaScript |
+| **Templating** | Jinja2 |
 
-**Frontend:**
-- HTML5
-- Tailwind CSS
-- JavaScript (Vanilla/Alpine.js)
+---
 
 ## 📦 Project Structure
 ```
-theatre-booking/
-├── 01_BUSINESS_REQUIREMENTS.md
-├── 02_CONCEPTUAL_MODEL_ERD.md
-├── 03_LOGICAL_MODEL.md
-├── 04_PHYSICAL_MODEL_SQL.md
-├── 05_APPLICATION_IMPLEMENTATION.md
-├── README.md
+theatre-333/
+├── 01_BUSINESS_REQUIREMENTS.md     # Business analysis
+├── 02_CONCEPTUAL_MODEL_ERD.md      # ERD specification
+├── 03_LOGICAL_MODEL.md             # Logical schema + normalization
+├── 04_PHYSICAL_MODEL_SQL.md        # MySQL implementation
+├── 05_APPLICATION_IMPLEMENTATION.md # Integration guide
+├── README.md                       # This file
+│
 ├── backend/
 │   ├── app/
-│   │   ├── main.py
-│   │   ├── database.py
-│   │   ├── models.py
+│   │   ├── __init__.py
+│   │   ├── main.py                 # FastAPI application
+│   │   ├── database.py             # MySQL connection
+│   │   ├── models.py               # SQLAlchemy models
+│   │   ├── schemas.py              # Pydantic schemas
+│   │   ├── crud.py                 # Database operations
+│   │   ├── auth.py                 # JWT authentication
+│   │   ├── utils.py                # Utility functions
 │   │   └── routers/
+│   │       ├── users.py
+│   │       ├── shows.py
+│   │       ├── performances.py
+│   │       ├── bookings.py
+│   │       └── payments.py
+│   ├── alembic/                    # Database migrations
+│   ├── init_db.py                  # Database initialization
 │   └── requirements.txt
-└── frontend/
-    ├── templates/
-    └── static/
+│
+├── frontend/
+│   ├── static/
+│   │   ├── css/styles.css
+│   │   └── js/app.js
+│   └── templates/
+│       ├── base.html               # Base template
+│       ├── index.html              # Home page
+│       ├── shows.html              # Browse shows
+│       ├── show_detail.html        # Show details
+│       ├── seat_selection.html     # Interactive seat map
+│       ├── payment.html            # Payment page
+│       ├── confirmation.html       # Booking confirmation
+│       ├── ticket.html             # E-Ticket with QR
+│       ├── my_bookings.html        # Booking history
+│       ├── admin.html              # Admin panel
+│       ├── login.html              # Login page
+│       └── register.html           # Registration page
+│
+└── presentation/
+    ├── index.html                  # HTML presentation
+    ├── Theatre_Booking_System.pptx # PowerPoint slides
+    └── erd_diagram.svg             # Crow's Foot ERD
 ```
 
-## 🎯 Use Cases Supported
+---
 
-1. **User Registration & Authentication**
-2. **Browse Shows & Performances**
-3. **Seat Selection & Booking**
-4. **Payment Processing**
-5. **Booking Management**
-6. **Admin Reporting**
-7. **Revenue Analytics**
+## 🎯 Implemented Use Cases
 
-## 📊 Reports Available
+| # | Use Case | Status |
+|---|----------|--------|
+| 1 | User Registration & Login | ✅ Complete |
+| 2 | Browse Shows & Performances | ✅ Complete |
+| 3 | Interactive Seat Selection | ✅ Complete |
+| 4 | Booking Creation | ✅ Complete |
+| 5 | Payment Processing | ✅ Complete |
+| 6 | E-Ticket Generation (QR Code) | ✅ Complete |
+| 7 | Booking History | ✅ Complete |
+| 8 | Booking Cancellation | ✅ Complete |
+| 9 | Admin Show Management | ✅ Complete |
+| 10 | Admin User Management | ✅ Complete |
+| 11 | Profile Management | ✅ Complete |
 
-1. Daily Sales Report
-2. Performance Occupancy Analysis
-3. User Booking History
-4. Revenue by Show/Venue
-5. Seat Category Performance
+---
+
+## 🎓 Academic Compliance
+
+This project meets university-level requirements for **CSC 333 - Database Systems**:
+
+| Requirement | Documentation |
+|-------------|---------------|
+| ✅ Business analysis | `01_BUSINESS_REQUIREMENTS.md` |
+| ✅ Conceptual modeling (ERD) | `02_CONCEPTUAL_MODEL_ERD.md` + `erd_diagram.svg` |
+| ✅ Logical modeling | `03_LOGICAL_MODEL.md` |
+| ✅ Normalization (3NF) | `03_LOGICAL_MODEL.md` |
+| ✅ Physical modeling (MySQL) | `04_PHYSICAL_MODEL_SQL.md` |
+| ✅ Application integration | `05_APPLICATION_IMPLEMENTATION.md` |
+| ✅ Working implementation | `backend/` + `frontend/` |
+
+---
 
 ## 🔄 Future Enhancements
 
-- Mobile application (React Native/Flutter)
-- Email/SMS notifications
-- Advanced analytics dashboard
-- Multi-language support
-- Seat hold timeout mechanism
-- Promotional codes and discounts
+- [ ] Mobile application (React Native/Flutter)
+- [ ] Email/SMS notifications
+- [ ] Advanced analytics dashboard
+- [ ] Multi-language support
+- [ ] Seat hold timeout mechanism
+- [ ] Promotional codes and discounts
+- [ ] Integration with payment gateways (Stripe, PayPal)
 
-## 📞 Support & Contact
+---
 
-For questions or clarifications about this project:
-- Review the detailed documentation in each markdown file
-- Check the code examples in the Application Implementation guide
-- Refer to the SQL scripts for database setup
+## 👨‍💻 Author
+
+**Chukwuneku Akpotohwo**  
+Email: akpotohwoo@gmail.com  
+GitHub: [nekumartins/theatre-333](https://github.com/nekumartins/theatre-333)
+
+---
 
 ## 📄 License
 
@@ -227,8 +335,8 @@ This is an academic project developed for educational purposes.
 
 ---
 
-**Version**: 1.0  
-**Date**: November 24, 2025  
-**Purpose**: University Systems Analysis and Design Project  
-**Database**: MySQL 8.0+  
+**Version**: 2.0  
+**Date**: November 27, 2025  
+**Course**: CSC 333 - Database Systems  
+**Database**: MySQL 8.0  
 **Framework**: FastAPI + HTML/Tailwind CSS

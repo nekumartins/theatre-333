@@ -1,8 +1,15 @@
 # Online Theatre Booking System - Conceptual Data Model (ERD)
 
 ## Entity-Relationship Diagram Specification
-**Notation**: Oracle ERDish (Crow's Foot notation)  
-**Tool Compatibility**: Visio, Draw.io, Lucidchart
+**Notation**: Oracle ERDish / Crow's Foot notation  
+**Tool Compatibility**: Visio, Draw.io, Lucidchart  
+**Database**: MySQL 8.0  
+**Implementation**: SQLAlchemy ORM with FastAPI
+
+### 📊 ERD Diagram
+The complete ERD diagram is available as an SVG file:
+- **Location**: `presentation/erd_diagram.svg`
+- **Features**: Crow's Foot notation, all entities, relationships with cardinality
 
 ---
 
@@ -11,98 +18,150 @@
 ### 1.1 USER
 **Definition**: Registered customer who can browse shows and make bookings.
 
-**Attributes**:
-- **user_id** (PK): Unique identifier for each user
-- first_name: User's first name
-- last_name: User's last name
-- email: User's email address (unique)
-- phone: Contact phone number
-- password_hash: Encrypted password
-- date_of_birth: User's date of birth
-- address_line1: Primary address
-- address_line2: Secondary address (optional)
-- city: City of residence
-- postal_code: Postal/ZIP code
-- country: Country of residence
-- registration_date: Date user registered
-- email_verified: Boolean flag for email verification
-- account_status: Status (Active, Suspended, Deleted)
-- created_at: Timestamp of account creation
-- updated_at: Timestamp of last update
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **user_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| first_name | VARCHAR(50) | NOT NULL | User's first name |
+| last_name | VARCHAR(50) | NOT NULL | User's last name |
+| email | VARCHAR(100) | UNIQUE, NOT NULL, INDEX | User's email address |
+| phone | VARCHAR(20) | | Contact phone number |
+| password_hash | VARCHAR(255) | NOT NULL | Bcrypt encrypted password |
+| date_of_birth | DATE | | User's date of birth |
+| address_line1 | VARCHAR(100) | | Primary address |
+| address_line2 | VARCHAR(100) | | Secondary address (optional) |
+| city | VARCHAR(50) | | City of residence |
+| postal_code | VARCHAR(20) | | Postal/ZIP code |
+| country | VARCHAR(50) | | Country of residence |
+| registration_date | DATE | NOT NULL | Date user registered |
+| email_verified | BOOLEAN | DEFAULT FALSE | Email verification flag |
+| account_status | VARCHAR(20) | DEFAULT 'Active' | Active, Suspended, Deactivated |
+| is_admin | BOOLEAN | DEFAULT FALSE | Legacy admin flag |
+| role_id | INT | FK → ROLE | RBAC role assignment |
+| created_at | TIMESTAMP | DEFAULT NOW() | Account creation timestamp |
+| updated_at | TIMESTAMP | ON UPDATE NOW() | Last update timestamp |
 
-**Primary Key**: user_id
+**Primary Key**: user_id  
+**Foreign Keys**: role_id → ROLE
 
 ---
 
-### 1.2 SHOW
+### 1.2 ROLE (RBAC)
+**Definition**: Role-based access control - defines user roles and their permissions.
+
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **role_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| role_name | VARCHAR(50) | UNIQUE, NOT NULL | Admin, Manager, Staff, Customer |
+| description | TEXT | | Role description |
+| can_manage_shows | BOOLEAN | DEFAULT FALSE | Permission to manage shows |
+| can_manage_venues | BOOLEAN | DEFAULT FALSE | Permission to manage venues |
+| can_manage_performances | BOOLEAN | DEFAULT FALSE | Permission to manage performances |
+| can_manage_bookings | BOOLEAN | DEFAULT FALSE | Permission to manage bookings |
+| can_view_analytics | BOOLEAN | DEFAULT FALSE | Permission to view analytics |
+| can_manage_users | BOOLEAN | DEFAULT FALSE | Permission to manage users |
+| can_manage_pricing | BOOLEAN | DEFAULT FALSE | Permission to manage pricing |
+| can_issue_refunds | BOOLEAN | DEFAULT FALSE | Permission to issue refunds |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMP | ON UPDATE NOW() | Last update timestamp |
+
+**Primary Key**: role_id
+
+---
+
+### 1.3 AUDIT_LOG
+**Definition**: Audit trail for tracking admin/staff actions for compliance and debugging.
+
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **log_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| user_id | INT | FK → USER, NOT NULL | User who performed action |
+| action | VARCHAR(100) | NOT NULL | Action type (CREATE_SHOW, UPDATE_BOOKING, etc.) |
+| entity_type | VARCHAR(50) | NOT NULL | Entity type (Show, Booking, User) |
+| entity_id | INT | | ID of affected entity |
+| old_values | JSON | | Previous state for updates |
+| new_values | JSON | | New state |
+| ip_address | VARCHAR(45) | | Client IP address |
+| user_agent | VARCHAR(255) | | Browser/client user agent |
+| timestamp | TIMESTAMP | DEFAULT NOW() | Action timestamp |
+
+**Primary Key**: log_id  
+**Foreign Keys**: user_id → USER
+
+---
+
+### 1.4 GENRE
+**Definition**: Category or type of theatrical performance.
+
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **genre_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| genre_name | VARCHAR(50) | UNIQUE, NOT NULL | Genre name (Drama, Comedy, Musical) |
+| description | TEXT | | Description of the genre |
+
+**Primary Key**: genre_id
+
+---
+
+### 1.5 SHOW
 **Definition**: A theatrical production or performance title that can be scheduled multiple times.
 
-**Attributes**:
-- **show_id** (PK): Unique identifier for each show
-- title: Name of the show
-- description: Detailed description of the show
-- genre_id: Foreign key to GENRE
-- duration_minutes: Length of show in minutes
-- language: Language of performance
-- age_rating: Minimum age requirement
-- poster_url: URL to promotional poster image
-- producer: Name of producer
-- director: Name of director
-- show_status: Status (Active, Coming Soon, Archived)
-- created_at: Timestamp of creation
-- updated_at: Timestamp of last update
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **show_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| title | VARCHAR(200) | NOT NULL | Name of the show |
+| description | TEXT | | Detailed description |
+| genre_id | INT | FK → GENRE, NOT NULL | Genre category |
+| duration_minutes | INT | NOT NULL | Length of show in minutes |
+| language | VARCHAR(50) | | Language of performance |
+| age_rating | VARCHAR(10) | | Minimum age requirement |
+| poster_url | VARCHAR(255) | | URL to promotional poster |
+| producer | VARCHAR(100) | | Name of producer |
+| director | VARCHAR(100) | | Name of director |
+| show_status | VARCHAR(20) | DEFAULT 'Active' | Active, Coming Soon, Archived |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMP | ON UPDATE NOW() | Last update timestamp |
 
 **Primary Key**: show_id  
 **Foreign Keys**: genre_id → GENRE
 
 ---
 
-### 1.3 GENRE
-**Definition**: Category or type of theatrical performance.
-
-**Attributes**:
-- **genre_id** (PK): Unique identifier for each genre
-- genre_name: Name of the genre (e.g., Drama, Comedy, Musical)
-- description: Description of the genre
-
-**Primary Key**: genre_id
-
----
-
-### 1.4 VENUE
+### 1.6 VENUE
 **Definition**: Physical location where performances take place.
 
-**Attributes**:
-- **venue_id** (PK): Unique identifier for each venue
-- venue_name: Name of the theatre/venue
-- address_line1: Primary address
-- address_line2: Secondary address (optional)
-- city: City location
-- postal_code: Postal/ZIP code
-- country: Country
-- total_capacity: Maximum seating capacity
-- phone: Contact phone number
-- facilities: Description of facilities (parking, accessibility, etc.)
-- created_at: Timestamp of creation
-- updated_at: Timestamp of last update
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **venue_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| venue_name | VARCHAR(100) | NOT NULL | Name of the theatre/venue |
+| address_line1 | VARCHAR(100) | NOT NULL | Primary address |
+| address_line2 | VARCHAR(100) | | Secondary address |
+| city | VARCHAR(50) | NOT NULL | City location |
+| postal_code | VARCHAR(20) | | Postal/ZIP code |
+| country | VARCHAR(50) | NOT NULL | Country |
+| total_capacity | INT | NOT NULL | Maximum seating capacity |
+| phone | VARCHAR(20) | | Contact phone number |
+| facilities | TEXT | | Facilities description |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMP | ON UPDATE NOW() | Last update timestamp |
 
 **Primary Key**: venue_id
 
 ---
 
-### 1.5 SEAT
+### 1.7 SEAT
 **Definition**: Individual seat in a venue with specific location and category.
 
-**Attributes**:
-- **seat_id** (PK): Unique identifier for each seat
-- venue_id: Foreign key to VENUE
-- row_number: Row identifier (e.g., A, B, C, 1, 2, 3)
-- seat_number: Seat number within the row
-- section: Section of venue (e.g., Orchestra, Balcony, Mezzanine)
-- seat_category: Category (VIP, Premium, Standard)
-- is_accessible: Boolean for wheelchair accessibility
-- is_active: Boolean for seat availability (can be deactivated)
-- created_at: Timestamp of creation
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **seat_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| venue_id | INT | FK → VENUE, NOT NULL | Parent venue |
+| row_number | VARCHAR(10) | NOT NULL | Row identifier (A, B, C) |
+| seat_number | VARCHAR(10) | NOT NULL | Seat number within row |
+| section | VARCHAR(50) | | Section (Orchestra, Balcony) |
+| seat_category | VARCHAR(20) | NOT NULL | VIP, Premium, Standard |
+| is_accessible | BOOLEAN | DEFAULT FALSE | Wheelchair accessibility |
+| is_active | BOOLEAN | DEFAULT TRUE | Seat availability |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
 
 **Primary Key**: seat_id  
 **Foreign Keys**: venue_id → VENUE  
@@ -110,52 +169,53 @@
 
 ---
 
-### 1.6 SEAT_CATEGORY_PRICING
+### 1.8 SEAT_CATEGORY_PRICING
 **Definition**: Base pricing information for different seat categories.
 
-**Attributes**:
-- **category_id** (PK): Unique identifier for pricing category
-- category_name: Name (VIP, Premium, Standard, Economy)
-- base_price: Default price for this category
-- description: Description of category features
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **category_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| category_name | VARCHAR(50) | UNIQUE, NOT NULL | VIP, Premium, Standard, Economy |
+| base_price | DECIMAL(10,2) | NOT NULL | Default price for category |
+| description | TEXT | | Category features description |
 
 **Primary Key**: category_id
 
 ---
 
-### 1.7 PERFORMANCE
+### 1.9 PERFORMANCE
 **Definition**: A specific scheduled instance of a show at a venue on a particular date and time.
 
-**Attributes**:
-- **performance_id** (PK): Unique identifier for each performance
-- show_id: Foreign key to SHOW
-- venue_id: Foreign key to VENUE
-- performance_date: Date of performance
-- start_time: Start time of performance
-- end_time: Expected end time
-- total_seats: Total seats available
-- available_seats: Current number of available seats
-- performance_status: Status (Scheduled, Ongoing, Completed, Cancelled)
-- special_notes: Additional information (e.g., "Live orchestra")
-- created_at: Timestamp of creation
-- updated_at: Timestamp of last update
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **performance_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| show_id | INT | FK → SHOW, NOT NULL | Associated show |
+| venue_id | INT | FK → VENUE, NOT NULL | Performance venue |
+| performance_date | DATE | NOT NULL | Date of performance |
+| start_time | TIME | NOT NULL | Start time |
+| end_time | TIME | | Expected end time |
+| total_seats | INT | NOT NULL | Total seats available |
+| available_seats | INT | NOT NULL | Current available seats |
+| performance_status | VARCHAR(20) | DEFAULT 'Scheduled' | Scheduled, Ongoing, Completed, Cancelled |
+| special_notes | TEXT | | Additional information |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMP | ON UPDATE NOW() | Last update timestamp |
 
 **Primary Key**: performance_id  
-**Foreign Keys**: 
-- show_id → SHOW
-- venue_id → VENUE
+**Foreign Keys**: show_id → SHOW, venue_id → VENUE
 
 ---
 
-### 1.8 PERFORMANCE_PRICING
+### 1.10 PERFORMANCE_PRICING
 **Definition**: Dynamic pricing for seat categories specific to each performance.
 
-**Attributes**:
-- **pricing_id** (PK): Unique identifier for pricing rule
-- performance_id: Foreign key to PERFORMANCE
-- seat_category: Category name (VIP, Premium, Standard)
-- price: Price for this category in this performance
-- created_at: Timestamp of creation
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **pricing_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| performance_id | INT | FK → PERFORMANCE, NOT NULL | Associated performance |
+| seat_category | VARCHAR(20) | NOT NULL | VIP, Premium, Standard |
+| price | DECIMAL(10,2) | NOT NULL | Price for this category |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
 
 **Primary Key**: pricing_id  
 **Foreign Keys**: performance_id → PERFORMANCE  
@@ -163,67 +223,66 @@
 
 ---
 
-### 1.9 BOOKING
+### 1.11 BOOKING
 **Definition**: A customer's reservation for one or more seats at a specific performance.
 
-**Attributes**:
-- **booking_id** (PK): Unique identifier for each booking
-- user_id: Foreign key to USER
-- performance_id: Foreign key to PERFORMANCE
-- booking_reference: Unique alphanumeric reference code
-- booking_date: Timestamp when booking was created
-- total_amount: Total price for all seats
-- booking_status: Status (Pending, Confirmed, Cancelled, Expired)
-- cancellation_date: Date of cancellation (if applicable)
-- refund_amount: Amount refunded (if applicable)
-- created_at: Timestamp of creation
-- updated_at: Timestamp of last update
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **booking_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| user_id | INT | FK → USER, NOT NULL | Booking customer |
+| performance_id | INT | FK → PERFORMANCE, NOT NULL | Associated performance |
+| booking_reference | VARCHAR(20) | UNIQUE, NOT NULL | Alphanumeric reference code |
+| booking_date | TIMESTAMP | DEFAULT NOW() | Booking creation time |
+| total_amount | DECIMAL(10,2) | NOT NULL | Total price for all seats |
+| booking_status | VARCHAR(20) | DEFAULT 'Pending' | Pending, Confirmed, Cancelled, Expired |
+| payment_deadline | TIMESTAMP | | 15-minute payment deadline |
+| cancellation_date | TIMESTAMP | | Cancellation date if applicable |
+| refund_amount | DECIMAL(10,2) | | Amount refunded if applicable |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
+| updated_at | TIMESTAMP | ON UPDATE NOW() | Last update timestamp |
 
 **Primary Key**: booking_id  
-**Foreign Keys**: 
-- user_id → USER
-- performance_id → PERFORMANCE  
+**Foreign Keys**: user_id → USER, performance_id → PERFORMANCE  
 **Unique Key**: booking_reference
 
 ---
 
-### 1.10 BOOKING_DETAIL
+### 1.12 BOOKING_DETAIL
 **Definition**: Individual seat assignments within a booking.
 
-**Attributes**:
-- **booking_detail_id** (PK): Unique identifier for each booking detail
-- booking_id: Foreign key to BOOKING
-- seat_id: Foreign key to SEAT
-- seat_price: Price paid for this seat
-- row_number: Row of the seat (denormalized for reporting)
-- seat_number: Seat number (denormalized for reporting)
-- seat_category: Category (denormalized for reporting)
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **booking_detail_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| booking_id | INT | FK → BOOKING, NOT NULL | Parent booking |
+| seat_id | INT | FK → SEAT, NOT NULL | Reserved seat |
+| seat_price | DECIMAL(10,2) | NOT NULL | Price paid for seat |
+| row_number | VARCHAR(10) | NOT NULL | Row (denormalized) |
+| seat_number | VARCHAR(10) | NOT NULL | Seat number (denormalized) |
+| seat_category | VARCHAR(20) | NOT NULL | Category (denormalized) |
 
 **Primary Key**: booking_detail_id  
-**Foreign Keys**: 
-- booking_id → BOOKING
-- seat_id → SEAT  
-**Composite Unique Key**: (booking_id, seat_id)  
-*Note: A seat can appear in multiple bookings but only once per performance (enforced by business logic)*
+**Foreign Keys**: booking_id → BOOKING, seat_id → SEAT  
+**Composite Unique Key**: (booking_id, seat_id)
 
 ---
 
-### 1.11 PAYMENT
+### 1.13 PAYMENT
 **Definition**: Financial transaction record for a booking.
 
-**Attributes**:
-- **payment_id** (PK): Unique identifier for each payment
-- booking_id: Foreign key to BOOKING
-- payment_amount: Amount paid
-- payment_method: Method (Credit Card, Debit Card, Digital Wallet)
-- payment_date: Timestamp of payment
-- transaction_id: External payment gateway transaction reference
-- payment_status: Status (Pending, Completed, Failed, Refunded)
-- gateway_response: Response message from payment gateway
-- card_last_four: Last 4 digits of card (if applicable)
-- refund_date: Date of refund (if applicable)
-- refund_transaction_id: Refund transaction reference
-- created_at: Timestamp of creation
+| Attribute | Type | Constraints | Description |
+|-----------|------|-------------|-------------|
+| **payment_id** | INT | PK, AUTO_INCREMENT | Unique identifier |
+| booking_id | INT | FK → BOOKING, NOT NULL | Associated booking |
+| payment_amount | DECIMAL(10,2) | NOT NULL | Amount paid |
+| payment_method | VARCHAR(50) | NOT NULL | Credit Card, Debit Card, PayPal, Bank Transfer |
+| payment_date | TIMESTAMP | DEFAULT NOW() | Payment timestamp |
+| transaction_id | VARCHAR(100) | | Gateway transaction reference |
+| payment_status | VARCHAR(20) | DEFAULT 'Pending' | Pending, Completed, Failed, Refunded |
+| gateway_response | TEXT | | Payment gateway response |
+| card_last_four | VARCHAR(4) | | Last 4 digits of card |
+| refund_date | TIMESTAMP | | Refund date if applicable |
+| refund_transaction_id | VARCHAR(100) | | Refund transaction reference |
+| created_at | TIMESTAMP | DEFAULT NOW() | Creation timestamp |
 
 **Primary Key**: payment_id  
 **Foreign Keys**: booking_id → BOOKING
@@ -232,123 +291,90 @@
 
 ## 2. Relationships
 
-### 2.1 USER to BOOKING
+### 2.1 ROLE to USER
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One user can make many bookings; each booking belongs to one user
-- **Optionality**: 
-  - USER: Optional (user may exist without bookings)
-  - BOOKING: Mandatory (every booking must have a user)
+- **Description**: One role can be assigned to many users; each user has one role
+- **Optionality**: ROLE: Optional | USER: Optional
+- **Foreign Key**: USER.role_id → ROLE.role_id
+- **ERD Notation**: ROLE —|————o<— USER
+
+### 2.2 USER to AUDIT_LOG
+- **Relationship Type**: One-to-Many
+- **Cardinality**: 1:N
+- **Description**: One user can have many audit log entries
+- **Foreign Key**: AUDIT_LOG.user_id → USER.user_id
+- **ERD Notation**: USER —|————<— AUDIT_LOG
+
+### 2.3 USER to BOOKING
+- **Relationship Type**: One-to-Many
+- **Cardinality**: 1:N
+- **Description**: One user can make many bookings
 - **Foreign Key**: BOOKING.user_id → USER.user_id
-- **ERD Notation**: USER —|————<— BOOKING
+- **ERD Notation**: USER —|————o<— BOOKING
 
----
-
-### 2.2 SHOW to GENRE
-- **Relationship Type**: Many-to-One
-- **Cardinality**: N:1
-- **Description**: Many shows can belong to one genre; each show has one genre
-- **Optionality**: 
-  - SHOW: Mandatory (every show must have a genre)
-  - GENRE: Optional (genre can exist without shows)
+### 2.4 GENRE to SHOW
+- **Relationship Type**: One-to-Many
+- **Cardinality**: 1:N
+- **Description**: Many shows can belong to one genre
 - **Foreign Key**: SHOW.genre_id → GENRE.genre_id
-- **ERD Notation**: SHOW >————|— GENRE
+- **ERD Notation**: GENRE —|————o<— SHOW
 
----
-
-### 2.3 SHOW to PERFORMANCE
+### 2.5 SHOW to PERFORMANCE
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One show can have many performances; each performance is of one show
-- **Optionality**: 
-  - SHOW: Optional (show can exist without scheduled performances)
-  - PERFORMANCE: Mandatory (every performance must be associated with a show)
+- **Description**: One show can have many performances
 - **Foreign Key**: PERFORMANCE.show_id → SHOW.show_id
-- **ERD Notation**: SHOW —|————<— PERFORMANCE
+- **ERD Notation**: SHOW —|————o<— PERFORMANCE
 
----
-
-### 2.4 VENUE to PERFORMANCE
+### 2.6 VENUE to PERFORMANCE
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One venue can host many performances; each performance is at one venue
-- **Optionality**: 
-  - VENUE: Optional (venue can exist without scheduled performances)
-  - PERFORMANCE: Mandatory (every performance must have a venue)
+- **Description**: One venue can host many performances
 - **Foreign Key**: PERFORMANCE.venue_id → VENUE.venue_id
-- **ERD Notation**: VENUE —|————<— PERFORMANCE
+- **ERD Notation**: VENUE —|————o<— PERFORMANCE
 
----
-
-### 2.5 VENUE to SEAT
+### 2.7 VENUE to SEAT
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One venue has many seats; each seat belongs to one venue
-- **Optionality**: 
-  - VENUE: Mandatory (venue must have at least one seat)
-  - SEAT: Mandatory (every seat must belong to a venue)
+- **Description**: One venue has many seats
 - **Foreign Key**: SEAT.venue_id → VENUE.venue_id
 - **ERD Notation**: VENUE —|————<— SEAT
 
----
-
-### 2.6 PERFORMANCE to BOOKING
+### 2.8 PERFORMANCE to BOOKING
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One performance can have many bookings; each booking is for one performance
-- **Optionality**: 
-  - PERFORMANCE: Optional (performance can exist without bookings)
-  - BOOKING: Mandatory (every booking must be for a performance)
+- **Description**: One performance can have many bookings
 - **Foreign Key**: BOOKING.performance_id → PERFORMANCE.performance_id
-- **ERD Notation**: PERFORMANCE —|————<— BOOKING
+- **ERD Notation**: PERFORMANCE —|————o<— BOOKING
 
----
-
-### 2.7 PERFORMANCE to PERFORMANCE_PRICING
+### 2.9 PERFORMANCE to PERFORMANCE_PRICING
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One performance has multiple pricing tiers; each pricing rule is for one performance
-- **Optionality**: 
-  - PERFORMANCE: Mandatory (must have at least one pricing tier)
-  - PERFORMANCE_PRICING: Mandatory (every pricing rule must belong to a performance)
+- **Description**: One performance has multiple pricing tiers
 - **Foreign Key**: PERFORMANCE_PRICING.performance_id → PERFORMANCE.performance_id
 - **ERD Notation**: PERFORMANCE —|————<— PERFORMANCE_PRICING
 
----
-
-### 2.8 BOOKING to BOOKING_DETAIL
+### 2.10 BOOKING to BOOKING_DETAIL
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One booking contains many booking details (seats); each detail belongs to one booking
-- **Optionality**: 
-  - BOOKING: Mandatory (booking must have at least one seat)
-  - BOOKING_DETAIL: Mandatory (every booking detail must belong to a booking)
+- **Description**: One booking contains many seat details
 - **Foreign Key**: BOOKING_DETAIL.booking_id → BOOKING.booking_id
 - **ERD Notation**: BOOKING —|————<— BOOKING_DETAIL
 
----
-
-### 2.9 SEAT to BOOKING_DETAIL
+### 2.11 SEAT to BOOKING_DETAIL
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One seat can appear in many booking details (different performances); each detail references one seat
-- **Optionality**: 
-  - SEAT: Optional (seat can exist without bookings)
-  - BOOKING_DETAIL: Mandatory (every booking detail must reference a seat)
+- **Description**: One seat can appear in many booking details
 - **Foreign Key**: BOOKING_DETAIL.seat_id → SEAT.seat_id
-- **ERD Notation**: SEAT —|————<— BOOKING_DETAIL
+- **ERD Notation**: SEAT —|————o<— BOOKING_DETAIL
 
----
-
-### 2.10 BOOKING to PAYMENT
+### 2.12 BOOKING to PAYMENT
 - **Relationship Type**: One-to-Many
 - **Cardinality**: 1:N
-- **Description**: One booking can have multiple payment attempts; each payment is for one booking
-- **Optionality**: 
-  - BOOKING: Optional (booking can exist with pending payment)
-  - PAYMENT: Mandatory (every payment must be associated with a booking)
+- **Description**: One booking can have multiple payment attempts
 - **Foreign Key**: PAYMENT.booking_id → BOOKING.booking_id
-- **ERD Notation**: BOOKING —|————<— PAYMENT
+- **ERD Notation**: BOOKING —|————o<— PAYMENT
 
 ---
 
@@ -356,147 +382,130 @@
 
 ```
 ┌─────────────┐
-│   GENRE     │
+│    ROLE     │
 │  (PK: id)   │
-└─────────────┘
-       |
-       | 1
-       |
-       | N
-┌─────────────┐              ┌──────────────┐
-│    SHOW     │              │    VENUE     │
-│  (PK: id)   │              │   (PK: id)   │
-└─────────────┘              └──────────────┘
-       |                             |
-       | 1                           | 1
-       |                             |
-       | N                           | N
-┌─────────────────┐           ┌──────────────┐
-│  PERFORMANCE    │<──N───1───│    SEAT      │
-│   (PK: id)      │           │   (PK: id)   │
-└─────────────────┘           └──────────────┘
-       |                             |
-       | 1                           | 1
-       |                             |
-       | N                           | N
-┌───────────────────┐         ┌──────────────────┐
-│ PERFORMANCE_      │         │ BOOKING_DETAIL   │
-│   PRICING         │         │    (PK: id)      │
-│   (PK: id)        │         └──────────────────┘
-└───────────────────┘                 |
-                                      | N
-                                      |
-                                      | 1
-       ┌──────────────┐        ┌─────────────┐
-       │    USER      │        │   BOOKING   │
-       │  (PK: id)    │───1───>│  (PK: id)   │
-       └──────────────┘    N   └─────────────┘
-                                      |
-                                      | 1
-                                      |
-                                      | N
-                               ┌─────────────┐
-                               │   PAYMENT   │
-                               │  (PK: id)   │
-                               └─────────────┘
-
-┌──────────────────────┐
-│ SEAT_CATEGORY_       │
-│   PRICING            │
-│   (PK: id)           │
-│   (Reference table)  │
-└──────────────────────┘
+└──────┬──────┘
+       │ 1:N
+       ▼
+┌─────────────┐         ┌─────────────┐
+│    USER     │────1:N──►│  AUDIT_LOG  │
+│  (PK: id)   │         │  (PK: id)   │
+└──────┬──────┘         └─────────────┘
+       │ 1:N
+       ▼
+┌─────────────┐
+│   BOOKING   │────1:N────┐
+│  (PK: id)   │           │
+└──────┬──────┘           ▼
+       │ 1:N       ┌─────────────┐
+       │           │   PAYMENT   │
+       ▼           │  (PK: id)   │
+┌───────────────┐  └─────────────┘
+│BOOKING_DETAIL │
+│   (PK: id)    │
+└───────┬───────┘
+        │ N:1
+        ▼
+┌─────────────┐         ┌─────────────┐
+│    SEAT     │◄───N:1──│    VENUE    │
+│  (PK: id)   │         │  (PK: id)   │
+└─────────────┘         └──────┬──────┘
+                               │ 1:N
+┌─────────────┐                ▼
+│   GENRE     │         ┌─────────────────┐
+│  (PK: id)   │         │  PERFORMANCE    │◄──N:1──┐
+└──────┬──────┘         │   (PK: id)      │        │
+       │ 1:N            └────────┬────────┘        │
+       ▼                         │ 1:N             │
+┌─────────────┐                  ▼                 │
+│    SHOW     │──────────►┌───────────────────┐   │
+│  (PK: id)   │   1:N     │ PERFORMANCE_      │   │
+└─────────────┘           │   PRICING         │   │
+                          │   (PK: id)        │   │
+                          └───────────────────┘   │
+                                                  │
+                          ┌──────────────────────┘
+                          │
+                   ┌──────┴──────┐
+                   │   BOOKING   │
+                   │  (PK: id)   │
+                   └─────────────┘
 ```
 
 ---
 
 ## 4. Business Rules Reflected in ERD
 
-1. **Unique User Email**: Each user must have a unique email address (enforced by unique constraint)
-
-2. **Show-Performance Relationship**: A show can be performed multiple times, but each performance is tied to exactly one show
-
-3. **Venue-Seat Relationship**: Seats are permanently associated with venues; seat layout is venue-specific
-
-4. **Performance Capacity**: Total seats for a performance is determined by the venue's seat count
-
-5. **Booking-Seat Association**: Each booking can include multiple seats, but each seat in a booking is recorded separately in BOOKING_DETAIL
-
-6. **Seat Uniqueness per Performance**: A seat can only be booked once per performance (enforced through application logic and database constraints)
-
-7. **Dynamic Pricing**: Prices can vary by performance through PERFORMANCE_PRICING table
-
-8. **Payment Tracking**: Multiple payment attempts are tracked for each booking (for retries and refunds)
-
-9. **Genre Classification**: Shows are categorized by a single genre for simplicity
-
-10. **Booking Reference**: Each booking has a unique alphanumeric reference for customer lookup
+1. **Unique User Email**: Each user must have a unique email address
+2. **Role-Based Access Control (RBAC)**: Users can be assigned roles with granular permissions
+3. **Audit Trail**: All administrative actions are logged in AUDIT_LOG
+4. **Show-Performance Relationship**: A show can be performed multiple times
+5. **Venue-Seat Relationship**: Seats are permanently associated with venues
+6. **Performance Capacity**: Total seats determined by venue's seat count
+7. **Booking-Seat Association**: Each booking can include multiple seats
+8. **Seat Uniqueness per Performance**: A seat can only be booked once per performance
+9. **Dynamic Pricing**: Prices can vary by performance through PERFORMANCE_PRICING
+10. **Payment Tracking**: Multiple payment attempts tracked for retries and refunds
+11. **Payment Deadline**: Bookings have a 15-minute payment deadline
+12. **Booking Reference**: Each booking has a unique alphanumeric reference
 
 ---
 
 ## 5. Additional Constraints and Indexes
 
 ### 5.1 Unique Constraints
-- USER.email (unique)
-- BOOKING.booking_reference (unique)
-- SEAT(venue_id, row_number, seat_number) (composite unique)
-- PERFORMANCE_PRICING(performance_id, seat_category) (composite unique)
-- BOOKING_DETAIL(booking_id, seat_id) (composite unique)
+- USER.email
+- ROLE.role_name
+- GENRE.genre_name
+- BOOKING.booking_reference
+- SEAT_CATEGORY_PRICING.category_name
+- SEAT(venue_id, row_number, seat_number)
+- PERFORMANCE_PRICING(performance_id, seat_category)
+- BOOKING_DETAIL(booking_id, seat_id)
 
 ### 5.2 Check Constraints
-- USER.account_status IN ('Active', 'Suspended', 'Deleted')
+- USER.account_status IN ('Active', 'Suspended', 'Deactivated')
 - SHOW.show_status IN ('Active', 'Coming Soon', 'Archived')
 - PERFORMANCE.performance_status IN ('Scheduled', 'Ongoing', 'Completed', 'Cancelled')
 - BOOKING.booking_status IN ('Pending', 'Confirmed', 'Cancelled', 'Expired')
 - PAYMENT.payment_status IN ('Pending', 'Completed', 'Failed', 'Refunded')
-- SEAT_CATEGORY_PRICING.base_price > 0
-- PERFORMANCE_PRICING.price > 0
-- PERFORMANCE.total_seats >= PERFORMANCE.available_seats
 
 ### 5.3 Recommended Indexes
-- INDEX on USER(email)
-- INDEX on BOOKING(user_id)
-- INDEX on BOOKING(performance_id)
-- INDEX on BOOKING(booking_reference)
-- INDEX on BOOKING_DETAIL(booking_id)
-- INDEX on BOOKING_DETAIL(seat_id)
-- INDEX on PERFORMANCE(show_id, performance_date)
-- INDEX on PERFORMANCE(venue_id, performance_date)
-- INDEX on PAYMENT(booking_id)
-- INDEX on SEAT(venue_id)
+- USER(email), USER(role_id)
+- AUDIT_LOG(user_id), AUDIT_LOG(timestamp)
+- BOOKING(user_id), BOOKING(performance_id), BOOKING(booking_reference)
+- BOOKING_DETAIL(booking_id), BOOKING_DETAIL(seat_id)
+- PERFORMANCE(show_id, performance_date), PERFORMANCE(venue_id, performance_date)
+- PAYMENT(booking_id), SEAT(venue_id)
 
 ---
 
-## 6. Drawing Instructions for ERD Tools
+## 6. Entity Count Summary
 
-### For Visio/Draw.io:
+| Entity | Description | Key Relationships |
+|--------|-------------|-------------------|
+| ROLE | User roles with permissions | 1:N with USER |
+| USER | Registered customers | 1:N with BOOKING, AUDIT_LOG |
+| AUDIT_LOG | Action audit trail | N:1 with USER |
+| GENRE | Show categories | 1:N with SHOW |
+| SHOW | Theatre productions | 1:N with PERFORMANCE |
+| VENUE | Physical locations | 1:N with SEAT, PERFORMANCE |
+| SEAT | Individual seats | 1:N with BOOKING_DETAIL |
+| SEAT_CATEGORY_PRICING | Base pricing | Reference table |
+| PERFORMANCE | Scheduled instances | 1:N with BOOKING, PRICING |
+| PERFORMANCE_PRICING | Dynamic pricing | N:1 with PERFORMANCE |
+| BOOKING | Customer reservations | 1:N with BOOKING_DETAIL, PAYMENT |
+| BOOKING_DETAIL | Seat assignments | N:1 with BOOKING, SEAT |
+| PAYMENT | Financial transactions | N:1 with BOOKING |
 
-1. **Create Entities** as rectangles with rounded corners
-2. **Label** each entity with its name at the top
-3. **List attributes** inside each entity box
-4. **Mark Primary Keys** with (PK) or underline
-5. **Mark Foreign Keys** with (FK)
-6. **Draw relationship lines** using Crow's Foot notation:
-   - **One**: Single line with perpendicular bar (|)
-   - **Many**: Crow's foot symbol (<)
-   - **Optional**: Circle (O) on the line
-   - **Mandatory**: Perpendicular bar (|) on the line
-
-### Example Relationship Notation:
-```
-USER —|————<— BOOKING
-     (1)    (N)
-  Mandatory  Mandatory
-
-SHOW —|————O<— PERFORMANCE
-     (1)      (N)
-  Optional   Mandatory
-```
+**Total Entities**: 13
 
 ---
 
 ## Document Control
-- **Version**: 1.0
-- **Date**: November 24, 2025
+- **Version**: 2.0
+- **Date**: November 27, 2025
+- **Database**: MySQL 8.0
+- **ORM**: SQLAlchemy
 - **Compliance**: Oracle ERDish / Crow's Foot Notation
 - **Purpose**: Academic Database Design - Conceptual Model
