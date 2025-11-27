@@ -84,43 +84,6 @@
             }
         }
 
-        // Check if user is logged in
-        const token = localStorage.getItem('access_token');
-        const firstName = localStorage.getItem('user_first_name');
-        const isAdmin = localStorage.getItem('is_admin') === 'true';
-        const authButtons = document.getElementById('authButtons');
-        const bookingsLink = document.getElementById('bookingsLink');
-        const adminLink = document.getElementById('adminLink');
-        
-        if (token && isTokenValid(token)) {
-            const displayName = firstName || 'User';
-            authButtons.innerHTML = `
-                <span class="text-purple-400 px-3 py-2 text-sm font-medium">👋 Hi ${displayName}</span>
-                <button onclick="logout()" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 rounded-lg text-sm font-medium transition-all border border-pink-500/20">
-                    Logout
-                </button>
-            `;
-            bookingsLink.href = '/my-bookings';
-            
-            // Show admin link if user is admin
-            if (isAdmin && adminLink) {
-                adminLink.classList.remove('hidden');
-            }
-        } else {
-            // Token expired or invalid, clear it
-            if (token) {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('user_email');
-                localStorage.removeItem('user_first_name');
-                localStorage.removeItem('is_admin');
-            }
-            bookingsLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('Please login to view your bookings');
-                window.location.href = '/login';
-            });
-        }
-        
         function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('access_token');
@@ -130,6 +93,54 @@
                 window.location.href = '/';
             }
         }
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('access_token');
+            const firstName = localStorage.getItem('user_first_name');
+            const isAdmin = localStorage.getItem('is_admin') === 'true';
+            const authButtons = document.getElementById('authButtons');
+            const bookingsLink = document.getElementById('bookingsLink');
+            const adminLink = document.getElementById('adminLink');
+            
+            console.log('Base.html auth check - Token exists:', !!token, 'Valid:', isTokenValid(token));
+            
+            if (token && isTokenValid(token)) {
+                const displayName = firstName || 'User';
+                if (authButtons) {
+                    authButtons.innerHTML = `
+                        <span class="text-purple-400 px-3 py-2 text-sm font-medium">👋 Hi ${displayName}</span>
+                        <button onclick="logout()" class="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 rounded-lg text-sm font-medium transition-all border border-pink-500/20">
+                            Logout
+                        </button>
+                    `;
+                }
+                if (bookingsLink) {
+                    bookingsLink.href = '/my-bookings';
+                }
+                
+                // Show admin link if user is admin
+                if (isAdmin && adminLink) {
+                    adminLink.classList.remove('hidden');
+                }
+            } else {
+                // Token expired or invalid, clear it
+                if (token) {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('user_email');
+                    localStorage.removeItem('user_first_name');
+                    localStorage.removeItem('is_admin');
+                }
+                if (bookingsLink) {
+                    bookingsLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        alert('Please login to view your bookings');
+                        window.location.href = '/login';
+                    });
+                }
+            }
+        });
     </script>
     {% block scripts %}{% endblock %}
 </body>

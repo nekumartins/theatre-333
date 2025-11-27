@@ -134,107 +134,121 @@
 
 {% block scripts %}
 <script>
-    // Check if token is valid
-    function isTokenValid(token) {
-        if (!token) return false;
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const exp = payload.exp * 1000;
-            return Date.now() < exp;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    const token = localStorage.getItem('access_token');
-    if (!token || !isTokenValid(token)) {
-        localStorage.clear();
-        alert('Your session has expired. Please login again.');
-        window.location.href = '/login';
-    }
-
-    // Load profile data
-    async function loadProfile() {
-        try {
-            const response = await fetch(`/api/profile/me?token=${token}`);
-            if (!response.ok) throw new Error('Failed to load profile');
-            
-            const profile = await response.json();
-            
-            // Populate form fields
-            document.getElementById('first_name').value = profile.first_name || '';
-            document.getElementById('last_name').value = profile.last_name || '';
-            document.getElementById('email').value = profile.email || '';
-            document.getElementById('phone').value = profile.phone || '';
-            document.getElementById('date_of_birth').value = profile.date_of_birth || '';
-            document.getElementById('address_line1').value = profile.address_line1 || '';
-            document.getElementById('address_line2').value = profile.address_line2 || '';
-            document.getElementById('city').value = profile.city || '';
-            document.getElementById('postal_code').value = profile.postal_code || '';
-            document.getElementById('country').value = profile.country || '';
-            
-            // Display read-only fields
-            document.getElementById('registration_date').textContent = 
-                new Date(profile.registration_date).toLocaleDateString();
-            
-            const statusEl = document.getElementById('account_status');
-            statusEl.textContent = profile.account_status;
-            statusEl.className = 'inline-block px-3 py-1 rounded-lg text-sm font-medium ' + 
-                (profile.account_status === 'Active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
-                 'bg-red-500/10 text-red-400 border border-red-500/20');
-            
-            const verifiedEl = document.getElementById('email_verified');
-            verifiedEl.textContent = profile.email_verified ? '✓ Verified' : '✗ Not Verified';
-            verifiedEl.className = 'inline-block px-3 py-1 rounded-lg text-sm font-medium ' + 
-                (profile.email_verified ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
-                 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20');
-        } catch (error) {
-            console.error('Error loading profile:', error);
-            alert('Failed to load profile');
-        }
-    }
-
-    // Update profile
-    document.getElementById('profile-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const profileData = {
-            first_name: document.getElementById('first_name').value,
-            last_name: document.getElementById('last_name').value,
-            phone: document.getElementById('phone').value,
-            date_of_birth: document.getElementById('date_of_birth').value || null,
-            address_line1: document.getElementById('address_line1').value,
-            address_line2: document.getElementById('address_line2').value,
-            city: document.getElementById('city').value,
-            postal_code: document.getElementById('postal_code').value,
-            country: document.getElementById('country').value
-        };
-        
-        try {
-            const response = await fetch(`/api/profile/update?token=${token}`, {
-                method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(profileData)
-            });
-            
-            if (response.ok) {
-                // Update stored first name
-                localStorage.setItem('user_first_name', profileData.first_name);
-                alert('✓ Profile updated successfully!');
-                loadProfile(); // Reload to show updated data
-            } else {
-                const error = await response.json();
-                alert('Failed to update profile: ' + (error.detail || 'Unknown error'));
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Check if token is valid
+        function isTokenValid(token) {
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp * 1000;
+                return Date.now() < exp;
+            } catch (e) {
+                return false;
             }
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            alert('Error updating profile. Please try again.');
         }
-    });
 
-    loadProfile();
+        const token = localStorage.getItem('access_token');
+        if (!token || !isTokenValid(token)) {
+            localStorage.clear();
+            alert('Your session has expired. Please login again.');
+            window.location.href = '/login';
+            return;
+        }
+
+        // Load profile data
+        async function loadProfile() {
+            console.log('Loading profile with token:', token.substring(0, 20) + '...');
+            try {
+                const response = await fetch('/api/profile/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                console.log('Profile response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Profile error:', errorText);
+                    throw new Error('Failed to load profile');
+                }
+                
+                const profile = await response.json();
+                console.log('Profile data:', profile);
+                
+                // Populate form fields
+                document.getElementById('first_name').value = profile.first_name || '';
+                document.getElementById('last_name').value = profile.last_name || '';
+                document.getElementById('email').value = profile.email || '';
+                document.getElementById('phone').value = profile.phone || '';
+                document.getElementById('date_of_birth').value = profile.date_of_birth || '';
+                document.getElementById('address_line1').value = profile.address_line1 || '';
+                document.getElementById('address_line2').value = profile.address_line2 || '';
+                document.getElementById('city').value = profile.city || '';
+                document.getElementById('postal_code').value = profile.postal_code || '';
+                document.getElementById('country').value = profile.country || '';
+                
+                // Display read-only fields
+                document.getElementById('registration_date').textContent = 
+                    new Date(profile.registration_date).toLocaleDateString();
+                
+                const statusEl = document.getElementById('account_status');
+                statusEl.textContent = profile.account_status;
+                statusEl.className = 'inline-block px-3 py-1 rounded-lg text-sm font-medium ' + 
+                    (profile.account_status === 'Active' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
+                     'bg-red-500/10 text-red-400 border border-red-500/20');
+                
+                const verifiedEl = document.getElementById('email_verified');
+                verifiedEl.textContent = profile.email_verified ? '✓ Verified' : '✗ Not Verified';
+                verifiedEl.className = 'inline-block px-3 py-1 rounded-lg text-sm font-medium ' + 
+                    (profile.email_verified ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
+                     'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20');
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Failed to load profile: ' + error.message);
+            }
+        }
+
+        // Update profile
+        document.getElementById('profile-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const profileData = {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                phone: document.getElementById('phone').value,
+                date_of_birth: document.getElementById('date_of_birth').value || null,
+                address_line1: document.getElementById('address_line1').value,
+                address_line2: document.getElementById('address_line2').value,
+                city: document.getElementById('city').value,
+                postal_code: document.getElementById('postal_code').value,
+                country: document.getElementById('country').value
+            };
+            
+            try {
+                const response = await fetch('/api/profile/update', {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+                
+                if (response.ok) {
+                    // Update stored first name
+                    localStorage.setItem('user_first_name', profileData.first_name);
+                    alert('✓ Profile updated successfully!');
+                    loadProfile(); // Reload to show updated data
+                } else {
+                    const error = await response.json();
+                    alert('Failed to update profile: ' + (error.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Error updating profile. Please try again.');
+            }
+        });
+
+        // Load profile on page load
+        await loadProfile();
+    });
 </script>
 {% endblock %}

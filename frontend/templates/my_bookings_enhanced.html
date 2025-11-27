@@ -98,7 +98,8 @@
 
 {% block scripts %}
 <script>
-    // token is already declared in base.html, reuse it
+    // Get token from localStorage
+    const token = localStorage.getItem('access_token');
     let allBookings = [];
     let currentFilter = 'all';
     let selectedBookingId = null;

@@ -78,6 +78,12 @@ async def seat_selection_page(request: Request, performance_id: int):
     return templates.TemplateResponse("seat_selection.html", {"request": request, "performance_id": performance_id})
 
 
+@app.get("/performances/{performance_id}", response_class=HTMLResponse)
+async def performance_detail_page(request: Request, performance_id: int):
+    """Performance detail page - shows seat selection"""
+    return templates.TemplateResponse("seat_selection.html", {"request": request, "performance_id": performance_id})
+
+
 @app.get("/booking/{booking_id}/payment", response_class=HTMLResponse)
 async def payment_page(request: Request, booking_id: int):
     """Payment page (requires login)"""

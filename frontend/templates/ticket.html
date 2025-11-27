@@ -142,13 +142,21 @@
     // Get booking ID from URL
     const pathParts = window.location.pathname.split('/');
     const bookingId = pathParts[pathParts.indexOf('booking') + 1];
-    // token is already declared in base.html
+    // Get token from localStorage
+    const token = localStorage.getItem('access_token');
     
     console.log('Ticket page - Path:', window.location.pathname);
     console.log('Ticket page - Booking ID:', bookingId);
     console.log('Ticket page - Token exists:', !!token);
 
     async function loadTicket() {
+        if (!token) {
+            console.error('No token found');
+            alert('Please login to view your ticket');
+            window.location.href = '/login';
+            return;
+        }
+        
         try {
             console.log('Fetching ticket for booking:', bookingId);
             
@@ -171,6 +179,7 @@
                     }
                     throw new Error(error.detail || 'Failed to load ticket');
                 } catch (e) {
+                    if (e.message.includes('Failed to load')) throw e;
                     throw new Error('Failed to load ticket: ' + errorText);
                 }
             }
