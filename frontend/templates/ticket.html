@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}My Ticket{% endblock %}
+
+{% block preauth %}
+<script>
+    (function() {
+        function isTokenValid(token) {
+            if (!token) return false;
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp * 1000;
+                return Date.now() < exp;
+            } catch (e) {
+                return false;
+            }
+        }
+        const token = localStorage.getItem('access_token');
+        if (!token || !isTokenValid(token)) {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    })();
+</script>
+<style>
+    @media print {
+        body * { visibility: hidden; }
+        #ticket-container, #ticket-container * { visibility: visible; }
+        #ticket-container { position: absolute; left: 0; top: 0; width: 100%; }
+        .no-print { display: none !important; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#0a0a0f] py-12">
+    <div class="max-w-3xl mx-auto px-4">
+        <!-- Action Buttons -->
+        <div class="flex justify-between items-center mb-6 no-print">
+            <a href="/my-bookings" class="text-purple-400 hover:text-purple-300 transition-colors">
+                ← Back to My Bookings
+            </a>
+            <div class="flex space-x-4">
+                <button onclick="downloadTicket()" class="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors">
+                    📥 Download
+                </button>
+                <button onclick="window.print()" class="px-4 py-2 bg-pink-500/20 text-pink-400 rounded-lg hover:bg-pink-500/30 transition-colors">
+                    🖨️ Print
+                </button>
+            </div>
+        </div>
+
+        <!-- Ticket Card -->
+        <div id="ticket-container" class="bg-gradient-to-br from-[#12121a] to-[#1a1a24] rounded-xl border border-purple-500/20 overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-center">
+                <h1 class="text-3xl font-bold text-white">🎭 E-TICKET</h1>
+                <p class="text-white/80 mt-1">Theatre Booking System</p>
+            </div>
+
+            <div class="p-8">
+                <!-- Show Details -->
+                <div class="text-center mb-8">
+                    <h2 id="showTitle" class="text-3xl font-bold text-white mb-2">Loading...</h2>
+                    <p id="showGenre" class="text-purple-400"></p>
+                </div>
+
+                <!-- Main Info Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-[#0a0a0f] p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm mb-1">📅 DATE</p>
+                        <p id="perfDate" class="text-white font-bold">-</p>
+                    </div>
+                    <div class="bg-[#0a0a0f] p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm mb-1">🕐 TIME</p>
+                        <p id="perfTime" class="text-white font-bold">-</p>
+                    </div>
+                    <div class="bg-[#0a0a0f] p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm mb-1">📍 VENUE</p>
+                        <p id="venueName" class="text-white font-bold">-</p>
+                    </div>
+                    <div class="bg-[#0a0a0f] p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm mb-1">💺 SEATS</p>
+                        <p id="seatCount" class="text-white font-bold">-</p>
+                    </div>
+                </div>
+
+                <!-- Seat Details -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-4">Seat Information</h3>
+                    <div id="seatsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- Seats loaded here -->
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-dashed border-purple-500/30 my-8 relative">
+                    <div class="absolute -left-4 -top-4 w-8 h-8 bg-[#0a0a0f] rounded-full"></div>
+                    <div class="absolute -right-4 -top-4 w-8 h-8 bg-[#0a0a0f] rounded-full"></div>
+                </div>
+
+                <!-- QR Code and Reference -->
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="text-center md:text-left mb-6 md:mb-0">
+                        <p class="text-gray-400 text-sm mb-2">BOOKING REFERENCE</p>
+                        <p id="bookingRef" class="text-3xl font-mono font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            -
+                        </p>
+                        <p class="text-gray-400 text-xs mt-2">Show this code at the entrance</p>
+                    </div>
+                    
+                    <!-- QR Code -->
+                    <div class="bg-white p-4 rounded-lg">
+                        <img id="qrCode" src="" alt="QR Code" class="w-40 h-40">
+                    </div>
+                </div>
+
+                <!-- Important Notice -->
+                <div class="mt-8 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <h4 class="text-yellow-400 font-semibold mb-2">⚠️ Important</h4>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li>• Please arrive at least 15 minutes before showtime</li>
+                        <li>• Present this ticket (printed or digital) at the venue entrance</li>
+                        <li>• This ticket is non-transferable</li>
+                        <li>• Photography and recording during the performance is prohibited</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-[#0a0a0f] p-4 text-center text-gray-500 text-sm">
+                <p>Ticket generated on <span id="generatedDate">-</span></p>
+                <p class="mt-1">© 2025 Theatre Booking System</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Get booking ID from URL
+    const pathParts = window.location.pathname.split('/');
+    const bookingId = pathParts[pathParts.indexOf('booking') + 1];
+    // token is already declared in base.html
+    
+    console.log('Ticket page - Path:', window.location.pathname);
+    console.log('Ticket page - Booking ID:', bookingId);
+    console.log('Ticket page - Token exists:', !!token);
+
+    async function loadTicket() {
+        try {
+            console.log('Fetching ticket for booking:', bookingId);
+            
+            // Get ticket data
+            const response = await fetch(`/api/bookings/${bookingId}/ticket`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            console.log('Ticket API response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                try {
+                    const error = JSON.parse(errorText);
+                    if (error.detail && error.detail.includes('not confirmed')) {
+                        alert('Your booking must be paid before you can view the ticket.');
+                        window.location.href = '/my-bookings';
+                        return;
+                    }
+                    throw new Error(error.detail || 'Failed to load ticket');
+                } catch (e) {
+                    throw new Error('Failed to load ticket: ' + errorText);
+                }
+            }
+            
+            const ticket = await response.json();
+            console.log('Ticket data received:', ticket);
+            
+            const bookingData = ticket.booking_data;
+            
+            // Populate ticket
+            document.getElementById('showTitle').textContent = bookingData.show_title || 'Unknown Show';
+            document.getElementById('perfDate').textContent = bookingData.performance_date || '-';
+            document.getElementById('perfTime').textContent = bookingData.start_time || '-';
+            document.getElementById('venueName').textContent = bookingData.venue_name || '-';
+            document.getElementById('bookingRef').textContent = ticket.booking_reference || '-';
+            
+            // QR Code
+            if (ticket.qr_code) {
+                document.getElementById('qrCode').src = ticket.qr_code;
+            }
+            
+            // Seats info
+            const seatInfo = bookingData.seat_info || '';
+            const seats = seatInfo.split(', ');
+            document.getElementById('seatCount').textContent = seats.length + ' seat(s)';
+            
+            const seatsList = document.getElementById('seatsList');
+            seatsList.innerHTML = seats.map(seat => `
+                <div class="bg-[#0a0a0f] p-3 rounded-lg flex items-center justify-between">
+                    <span class="text-white font-semibold">${seat}</span>
+                    <span class="text-green-400 text-sm">✓ Confirmed</span>
+                </div>
+            `).join('');
+            
+            // Generated date
+            document.getElementById('generatedDate').textContent = new Date().toLocaleString();
+            
+        } catch (error) {
+            console.error('Error loading ticket:', error);
+            alert('Failed to load ticket: ' + error.message);
+            window.location.href = '/my-bookings';
+        }
+    }
+
+    function downloadTicket() {
+        // Create a canvas from the ticket container
+        const ticketElement = document.getElementById('ticket-container');
+        
+        // Use html2canvas library if available, otherwise fallback to print
+        if (typeof html2canvas !== 'undefined') {
+            html2canvas(ticketElement).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `ticket-${document.getElementById('bookingRef').textContent}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        } else {
+            // Fallback: trigger print
+            window.print();
+        }
+    }
+
+    loadTicket();
+</script>
+<!-- Optional: Add html2canvas for download functionality -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+{% endblock %}
