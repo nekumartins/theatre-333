@@ -75,3 +75,18 @@ def get_genres(db: Session = Depends(database.get_db)):
     """Get all available genres"""
     genres = db.query(models.Genre).all()
     return {"genres": genres, "count": len(genres)}
+
+
+@router.get("/venues/")
+def get_venues(db: Session = Depends(database.get_db)):
+    """Get all available venues for filtering"""
+    venues = db.query(models.Venue).all()
+    venues_data = []
+    for venue in venues:
+        venues_data.append({
+            "venue_id": venue.venue_id,
+            "venue_name": venue.venue_name,
+            "city": venue.city,
+            "capacity": venue.total_capacity
+        })
+    return {"venues": venues_data, "count": len(venues_data)}

@@ -34,9 +34,8 @@ def process_payment(
         raise HTTPException(status_code=400, detail="Payment amount does not match booking total")
     
     # Simulate payment processing (in real app, integrate with payment gateway)
-    # Random success/failure for demonstration
-    import random
-    payment_success = random.random() > 0.1  # 90% success rate
+    # Always succeed for testing purposes
+    payment_success = True  # 100% success rate for simulated payments
     
     transaction_id = utils.generate_transaction_id()
     
@@ -87,13 +86,13 @@ def process_payment(
             "booking_reference": booking.booking_reference,
             "show_title": show.title,
             "performance_date": performance.performance_date.strftime("%B %d, %Y"),
-            "start_time": performance.start_time.strftime("%I:%M %P"),
+            "start_time": performance.start_time.strftime("%I:%M %p"),
             "venue_name": venue.venue_name,
-            "venue_address": f"{venue.address}, {venue.city}",
+            "venue_address": f"{venue.address_line1}, {venue.city}",
             "seat_info": seat_info,
             "total_amount": str(booking.total_amount),
             "payment_status": "Confirmed",
-            "booking_date": booking.booking_date.strftime("%B %d, %Y %I:%M %P")
+            "booking_date": booking.booking_date.strftime("%B %d, %Y %I:%M %p")
         }
         
         # Send confirmation email (in production this would actually send)
@@ -228,3 +227,4 @@ def process_refund(payment_id: int, db: Session = Depends(database.get_db)):
         "refund_amount": float(payment.payment_amount),
         "refund_date": str(payment.refund_date)
     }
+# Force reload

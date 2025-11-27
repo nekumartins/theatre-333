@@ -7,6 +7,28 @@ from app import models, schemas, database
 router = APIRouter(prefix="/api/performances", tags=["Performances"])
 
 
+@router.get("/")
+def get_all_performances(db: Session = Depends(database.get_db)):
+    """Get all upcoming performances"""
+    performances = db.query(models.Performance).filter(
+        models.Performance.performance_date >= date.today(),
+        models.Performance.performance_status == "Scheduled"
+    ).all()
+    
+    performances_data = []
+    for p in performances:
+        performances_data.append({
+            "performance_id": p.performance_id,
+            "show_id": p.show_id,
+            "venue_id": p.venue_id,
+            "performance_date": p.performance_date.isoformat() if p.performance_date else None,
+            "start_time": str(p.start_time) if p.start_time else None,
+            "performance_status": p.performance_status
+        })
+    
+    return {"performances": performances_data, "count": len(performances_data)}
+
+
 @router.get("/show/{show_id}", response_model=List[schemas.PerformanceResponse])
 def get_performances_for_show(show_id: int, db: Session = Depends(database.get_db)):
     """Get all upcoming performances for a specific show"""

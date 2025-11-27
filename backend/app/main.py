@@ -83,7 +83,7 @@ async def payment_page(request: Request, booking_id: int):
     """Payment page (requires login)"""
     # Check if user is logged in via localStorage (JavaScript handles this)
     # API endpoints are protected, this is just the page
-    return templates.TemplateResponse("payment.html", {"request": request, "booking_id": booking_id})
+    return templates.TemplateResponse("payment_new.html", {"request": request, "booking_id": booking_id})
 
 
 @app.get("/my-bookings", response_class=HTMLResponse)
@@ -91,7 +91,7 @@ async def my_bookings_page(request: Request):
     """User bookings page (requires login)"""
     # Check if user is logged in via localStorage (JavaScript handles this)
     # API endpoints are protected, this is just the page
-    return templates.TemplateResponse("my_bookings.html", {"request": request})
+    return templates.TemplateResponse("my_bookings_enhanced.html", {"request": request})
 
 
 @app.get("/login", response_class=HTMLResponse)
@@ -126,6 +126,30 @@ async def admin_page(request: Request):
 async def booking_confirmation_page(request: Request):
     """Booking confirmation page"""
     return templates.TemplateResponse("booking_confirmation.html", {"request": request})
+
+
+@app.get("/forgot-password", response_class=HTMLResponse)
+async def forgot_password_page(request: Request):
+    """Forgot password page"""
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+
+@app.get("/reset-password", response_class=HTMLResponse)
+async def reset_password_page(request: Request):
+    """Reset password page"""
+    return templates.TemplateResponse("reset_password.html", {"request": request})
+
+
+@app.get("/booking/{booking_id}/ticket", response_class=HTMLResponse)
+async def ticket_page(request: Request, booking_id: int):
+    """E-Ticket page (requires login and confirmed booking)"""
+    return templates.TemplateResponse("ticket.html", {"request": request, "booking_id": booking_id})
+
+
+@app.get("/show/{show_id}", response_class=HTMLResponse)
+async def show_detail_alt_page(request: Request, show_id: int):
+    """Show detail page (alternate URL)"""
+    return templates.TemplateResponse("show_detail.html", {"request": request, "show_id": show_id})
 
 
 @app.get("/health")

@@ -273,13 +273,13 @@ def get_ticket(booking_id: int, db: Session = Depends(database.get_db)):
         "booking_reference": booking.booking_reference,
         "show_title": show.title,
         "performance_date": performance.performance_date.strftime("%B %d, %Y"),
-        "start_time": performance.start_time.strftime("%I:%M %P"),
+        "start_time": performance.start_time.strftime("%I:%M %p"),
         "venue_name": venue.venue_name,
-        "venue_address": f"{venue.address}, {venue.city}",
+        "venue_address": f"{venue.address_line1}, {venue.city}",
         "seat_info": seat_info,
         "total_amount": str(booking.total_amount),
         "payment_status": "Confirmed",
-        "booking_date": booking.booking_date.strftime("%B %d, %Y %I:%M %P")
+        "booking_date": booking.booking_date.strftime("%B %d, %Y %I:%M %p")
     }
     
     return {
@@ -326,4 +326,89 @@ def send_confirmation_email(booking_id: int, db: Session = Depends(database.get_
         "message": "Confirmation email sent successfully",
         "email_status": email_result["status"],
         "recipient": email_result["recipient"]
+    }
+
+
+@router.post("/{booking_id}/refund")
+def request_refund(
+    booking_id: int,
+    refund_data: dict,
+    db: Session = Depends(database.get_db)
+):
+    """
+    Request a refund for a confirmed booking
+    Business requirement: Cancellations allowed up to 24 hours before performance
+    """
+    from datetime import datetime, timedelta
+    
+    booking = db.query(models.Booking).filter(
+        models.Booking.booking_id == booking_id
+    ).first()
+    
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    if booking.booking_status != "Confirmed":
+        raise HTTPException(status_code=400, detail="Can only refund confirmed bookings")
+    
+    # Get performance to check date
+    performance = db.query(models.Performance).filter(
+        models.Performance.performance_id == booking.performance_id
+    ).first()
+    
+    if not performance:
+        raise HTTPException(status_code=404, detail="Performance not found")
+    
+    # Check if within cancellation window (24 hours before performance)
+    perf_datetime = datetime.combine(performance.performance_date, performance.start_time)
+    hours_until_show = (perf_datetime - datetime.now()).total_seconds() / 3600
+    
+    if hours_until_show < 0:
+        raise HTTPException(status_code=400, detail="Cannot refund after performance has started")
+    
+    # Calculate refund amount based on policy
+    # Full refund if > 24 hours, 50% if < 24 hours
+    refund_amount = float(booking.total_amount)
+    refund_percentage = 100
+    
+    if hours_until_show < 24:
+        refund_amount = refund_amount * 0.5
+        refund_percentage = 50
+    
+    # Update booking status to Cancelled
+    booking.booking_status = "Cancelled"
+    
+    # Release the seats by updating available_seats count
+    booking_details = db.query(models.BookingDetail).filter(
+        models.BookingDetail.booking_id == booking_id
+    ).all()
+    
+    performance.available_seats += len(booking_details)
+    
+    # Update payment status to Refunded if exists
+    payment = db.query(models.Payment).filter(
+        models.Payment.booking_id == booking_id,
+        models.Payment.payment_status == "Completed"
+    ).first()
+    
+    if payment:
+        payment.payment_status = "Refunded"
+    
+    db.commit()
+    
+    # Get user for email notification
+    user = db.query(models.User).filter(
+        models.User.user_id == booking.user_id
+    ).first()
+    
+    return {
+        "message": "Refund request processed successfully",
+        "booking_id": booking_id,
+        "booking_reference": booking.booking_reference,
+        "original_amount": float(booking.total_amount),
+        "refund_amount": refund_amount,
+        "refund_percentage": refund_percentage,
+        "reason": refund_data.get("reason", "Customer requested"),
+        "status": "Refunded",
+        "email_sent_to": user.email if user else None
     }

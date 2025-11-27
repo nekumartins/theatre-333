@@ -129,6 +129,7 @@ class BookingResponse(BaseModel):
     booking_date: datetime
     total_amount: Decimal
     booking_status: str
+    payment_deadline: Optional[datetime] = None
     performance: Optional[PerformanceResponse] = None
     booking_details: Optional[List[BookingDetailResponse]] = []
     

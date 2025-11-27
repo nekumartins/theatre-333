@@ -59,8 +59,11 @@ def calculate_payment_deadline() -> datetime:
     Calculate payment deadline (15 minutes from booking creation)
     
     Business requirement: Bookings must be completed within 15 minutes or released
+    
+    Note: Using datetime.now() (local time) instead of datetime.utcnow() 
+    to match frontend JavaScript Date() which uses local time.
     """
-    return datetime.utcnow() + timedelta(minutes=15)
+    return datetime.now() + timedelta(minutes=15)
 
 
 def format_booking_email(booking_data: dict, qr_code_base64: str) -> str:
