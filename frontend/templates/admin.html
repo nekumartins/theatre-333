@@ -62,6 +62,18 @@
             <button onclick="switchTab('pricing')" id="pricingTab" class="tab-btn px-6 py-3 rounded-md transition-all">
                 Pricing
             </button>
+            <button onclick="switchTab('users')" id="usersTab" class="tab-btn px-6 py-3 rounded-md transition-all">
+                👥 Users
+            </button>
+            <button onclick="switchTab('bookings')" id="bookingsTab" class="tab-btn px-6 py-3 rounded-md transition-all">
+                🎫 Bookings
+            </button>
+            <button onclick="switchTab('roles')" id="rolesTab" class="tab-btn px-6 py-3 rounded-md transition-all">
+                🔐 Roles
+            </button>
+            <button onclick="switchTab('auditLogs')" id="auditLogsTab" class="tab-btn px-6 py-3 rounded-md transition-all">
+                📋 Audit
+            </button>
             <button onclick="switchTab('analytics')" id="analyticsTab" class="tab-btn px-6 py-3 rounded-md transition-all">
                 Analytics
             </button>
@@ -189,6 +201,275 @@
                 </div>
             </div>
         </div>
+
+        <!-- Users Management Section -->
+        <div id="usersSection" class="tab-content hidden">
+            <div class="bg-[#12121a] rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-white">👥 User Management</h2>
+                    <div class="flex gap-4">
+                        <input type="text" id="userSearch" placeholder="Search users..." 
+                               class="px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+                               onkeyup="searchUsers()">
+                        <select id="userStatusFilter" onchange="filterUsers()" class="px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                            <option value="">All Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Deactivated">Deactivated</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="usersList" class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-400 text-sm border-b border-gray-700">
+                            <tr>
+                                <th class="pb-3 px-2">User</th>
+                                <th class="pb-3 px-2">Email</th>
+                                <th class="pb-3 px-2">Status</th>
+                                <th class="pb-3 px-2">Role</th>
+                                <th class="pb-3 px-2">Bookings</th>
+                                <th class="pb-3 px-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="text-white">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Management Section -->
+        <div id="bookingsSection" class="tab-content hidden">
+            <div class="bg-[#12121a] rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-white">🎫 Booking Management</h2>
+                    <div class="flex gap-4">
+                        <input type="text" id="bookingSearch" placeholder="Search bookings..." 
+                               class="px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none"
+                               onkeyup="searchBookings()">
+                        <select id="bookingStatusFilter" onchange="filterBookingsAdmin()" class="px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Refunded">Refunded</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="bookingsList" class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-400 text-sm border-b border-gray-700">
+                            <tr>
+                                <th class="pb-3 px-2">Reference</th>
+                                <th class="pb-3 px-2">Customer</th>
+                                <th class="pb-3 px-2">Show</th>
+                                <th class="pb-3 px-2">Date</th>
+                                <th class="pb-3 px-2">Seats</th>
+                                <th class="pb-3 px-2">Amount</th>
+                                <th class="pb-3 px-2">Status</th>
+                                <th class="pb-3 px-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody" class="text-white">
+                            <!-- Bookings will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles Management Section -->
+        <div id="rolesSection" class="tab-content hidden">
+            <div class="bg-[#12121a] rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-white">🔐 Role Management</h2>
+                    <button onclick="openRoleModal()" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition-opacity">
+                        + Add Role
+                    </button>
+                </div>
+                <div id="rolesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Roles will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Logs Section -->
+        <div id="auditLogsSection" class="tab-content hidden">
+            <div class="bg-[#12121a] rounded-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-white">📋 Audit Logs</h2>
+                    <div class="flex gap-4">
+                        <select id="auditActionFilter" onchange="filterAuditLogs()" class="px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                            <option value="">All Actions</option>
+                        </select>
+                        <select id="auditEntityFilter" onchange="filterAuditLogs()" class="px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                            <option value="">All Entities</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="auditLogsList" class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-gray-400 text-sm border-b border-gray-700">
+                            <tr>
+                                <th class="pb-3 px-2">Timestamp</th>
+                                <th class="pb-3 px-2">User</th>
+                                <th class="pb-3 px-2">Action</th>
+                                <th class="pb-3 px-2">Entity</th>
+                                <th class="pb-3 px-2">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogsTableBody" class="text-white">
+                            <!-- Audit logs will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Edit Modal -->
+<div id="userModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-[#12121a] rounded-lg p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-white mb-6">Edit User</h3>
+        <form id="userForm" class="space-y-4">
+            <input type="hidden" id="editUserId">
+            <div>
+                <label class="block text-gray-300 mb-2">Name</label>
+                <p id="editUserName" class="text-white text-lg"></p>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Email</label>
+                <p id="editUserEmail" class="text-white"></p>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Account Status</label>
+                <select id="editUserStatus" class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                    <option value="Active">Active</option>
+                    <option value="Suspended">Suspended</option>
+                    <option value="Deactivated">Deactivated</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Role</label>
+                <select id="editUserRole" class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                    <option value="">No Role</option>
+                </select>
+            </div>
+            <div>
+                <label class="flex items-center space-x-2 text-gray-300">
+                    <input type="checkbox" id="editUserAdmin" class="rounded">
+                    <span>Admin Access</span>
+                </label>
+            </div>
+            <div class="flex space-x-4 pt-4">
+                <button type="button" onclick="closeUserModal()" class="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition-opacity">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Role Modal -->
+<div id="roleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-[#12121a] rounded-lg p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <h3 id="roleModalTitle" class="text-2xl font-bold text-white mb-6">Add Role</h3>
+        <form id="roleForm" class="space-y-4">
+            <input type="hidden" id="roleId">
+            <div>
+                <label class="block text-gray-300 mb-2">Role Name *</label>
+                <input type="text" id="roleName" required class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Description</label>
+                <textarea id="roleDescription" rows="2" class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none"></textarea>
+            </div>
+            <div class="border-t border-gray-700 pt-4">
+                <label class="block text-gray-300 mb-3">Permissions</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permManageShows" class="rounded">
+                        <span>Manage Shows</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permManageVenues" class="rounded">
+                        <span>Manage Venues</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permManagePerformances" class="rounded">
+                        <span>Manage Performances</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permManageBookings" class="rounded">
+                        <span>Manage Bookings</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permViewAnalytics" class="rounded">
+                        <span>View Analytics</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permManageUsers" class="rounded">
+                        <span>Manage Users</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permManagePricing" class="rounded">
+                        <span>Manage Pricing</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-300">
+                        <input type="checkbox" id="permIssueRefunds" class="rounded">
+                        <span>Issue Refunds</span>
+                    </label>
+                </div>
+            </div>
+            <div class="flex space-x-4 pt-4">
+                <button type="button" onclick="closeRoleModal()" class="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition-opacity">
+                    Save Role
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Refund Modal -->
+<div id="refundModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-[#12121a] rounded-lg p-8 max-w-md w-full mx-4">
+        <h3 class="text-2xl font-bold text-white mb-6">Issue Refund</h3>
+        <form id="refundForm" class="space-y-4">
+            <input type="hidden" id="refundBookingId">
+            <div>
+                <label class="block text-gray-300 mb-2">Booking Reference</label>
+                <p id="refundBookingRef" class="text-white text-lg font-mono"></p>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Original Amount</label>
+                <p id="refundOriginalAmount" class="text-white text-lg"></p>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Refund Amount</label>
+                <input type="number" id="refundAmount" step="0.01" class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                <p class="text-gray-500 text-sm mt-1">Leave empty for full refund</p>
+            </div>
+            <div>
+                <label class="block text-gray-300 mb-2">Reason *</label>
+                <textarea id="refundReason" required rows="3" class="w-full px-4 py-2 bg-[#0a0a0f] border border-gray-700 rounded-lg text-white focus:border-purple-500 focus:outline-none"></textarea>
+            </div>
+            <div class="flex space-x-4 pt-4">
+                <button type="button" onclick="closeRefundModal()" class="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    Issue Refund
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -452,12 +733,12 @@
         if (tab === 'shows') loadShows();
         else if (tab === 'venues') loadVenues();
         else if (tab === 'performances') loadPerformances();
-        else if (tab === 'pricing') {
-            loadPerformancesForPricing();
-        }
-        else if (tab === 'analytics') {
-            loadAnalytics();
-        }
+        else if (tab === 'pricing') loadPerformancesForPricing();
+        else if (tab === 'analytics') loadAnalytics();
+        else if (tab === 'users') loadUsers();
+        else if (tab === 'bookings') loadAdminBookings();
+        else if (tab === 'roles') loadRoles();
+        else if (tab === 'auditLogs') loadAuditLogs();
     }
 
     // Load stats
@@ -1293,6 +1574,629 @@
         } catch (error) {
             console.error('Error loading analytics:', error);
         }
+    }
+
+    // =============================================
+    // RBAC - USER MANAGEMENT
+    // =============================================
+    
+    let allUsers = [];
+    let allRoles = [];
+    
+    async function loadUsers() {
+        const token = localStorage.getItem('access_token');
+        const search = document.getElementById('userSearch')?.value || '';
+        const status = document.getElementById('userStatusFilter')?.value || '';
+        
+        try {
+            let url = '/api/admin/users?limit=100';
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (status) url += `&account_status=${status}`;
+            
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                allUsers = data.users;
+                renderUsers(allUsers);
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+    
+    function renderUsers(users) {
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = users.map(user => `
+            <tr class="border-b border-gray-800 hover:bg-gray-800/50">
+                <td class="py-3 px-2">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-bold">
+                            ${user.first_name[0]}${user.last_name[0]}
+                        </div>
+                        <div>
+                            <div class="font-medium">${user.first_name} ${user.last_name}</div>
+                            ${user.is_admin ? '<span class="text-xs text-purple-400">Admin</span>' : ''}
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3 px-2 text-gray-400">${user.email}</td>
+                <td class="py-3 px-2">
+                    <span class="px-2 py-1 rounded-full text-xs ${
+                        user.account_status === 'Active' ? 'bg-green-500/20 text-green-400' :
+                        user.account_status === 'Suspended' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                    }">${user.account_status}</span>
+                </td>
+                <td class="py-3 px-2 text-gray-400">${user.role_name || '-'}</td>
+                <td class="py-3 px-2 text-gray-400">${user.booking_count}</td>
+                <td class="py-3 px-2">
+                    <button onclick="editUser(${user.user_id})" class="text-purple-400 hover:text-purple-300 mr-2">Edit</button>
+                    <button onclick="viewUserDetails(${user.user_id})" class="text-blue-400 hover:text-blue-300">View</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function searchUsers() {
+        clearTimeout(window.userSearchTimeout);
+        window.userSearchTimeout = setTimeout(loadUsers, 300);
+    }
+    
+    function filterUsers() {
+        loadUsers();
+    }
+    
+    async function editUser(userId) {
+        const token = localStorage.getItem('access_token');
+        
+        // Load roles first
+        await loadRolesForSelect();
+        
+        const user = allUsers.find(u => u.user_id === userId);
+        if (!user) return;
+        
+        document.getElementById('editUserId').value = userId;
+        document.getElementById('editUserName').textContent = `${user.first_name} ${user.last_name}`;
+        document.getElementById('editUserEmail').textContent = user.email;
+        document.getElementById('editUserStatus').value = user.account_status;
+        document.getElementById('editUserRole').value = user.role_id || '';
+        document.getElementById('editUserAdmin').checked = user.is_admin;
+        
+        document.getElementById('userModal').classList.remove('hidden');
+        document.getElementById('userModal').classList.add('flex');
+    }
+    
+    async function loadRolesForSelect() {
+        const token = localStorage.getItem('access_token');
+        try {
+            const response = await fetch('/api/admin/roles', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                allRoles = await response.json();
+                const select = document.getElementById('editUserRole');
+                select.innerHTML = '<option value="">No Role</option>' + 
+                    allRoles.map(r => `<option value="${r.role_id}">${r.role_name}</option>`).join('');
+            }
+        } catch (error) {
+            console.error('Error loading roles:', error);
+        }
+    }
+    
+    function closeUserModal() {
+        document.getElementById('userModal').classList.add('hidden');
+        document.getElementById('userModal').classList.remove('flex');
+    }
+    
+    document.getElementById('userForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        const userId = document.getElementById('editUserId').value;
+        
+        const data = {
+            account_status: document.getElementById('editUserStatus').value,
+            is_admin: document.getElementById('editUserAdmin').checked,
+            role_id: document.getElementById('editUserRole').value ? parseInt(document.getElementById('editUserRole').value) : null
+        };
+        
+        try {
+            const response = await fetch(`/api/admin/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert('User updated successfully');
+                closeUserModal();
+                loadUsers();
+            } else {
+                const error = await response.json();
+                alert(error.detail || 'Failed to update user');
+            }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            alert('Failed to update user');
+        }
+    });
+    
+    async function viewUserDetails(userId) {
+        const token = localStorage.getItem('access_token');
+        try {
+            const response = await fetch(`/api/admin/users/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const user = await response.json();
+                alert(`User Details:\n\nName: ${user.first_name} ${user.last_name}\nEmail: ${user.email}\nStatus: ${user.account_status}\nRole: ${user.role_name || 'None'}\nBookings: ${user.booking_count}\nRegistered: ${user.registration_date}`);
+            }
+        } catch (error) {
+            console.error('Error loading user details:', error);
+        }
+    }
+
+    // =============================================
+    // RBAC - BOOKING MANAGEMENT
+    // =============================================
+    
+    let allAdminBookings = [];
+    
+    async function loadAdminBookings() {
+        const token = localStorage.getItem('access_token');
+        const search = document.getElementById('bookingSearch')?.value || '';
+        const status = document.getElementById('bookingStatusFilter')?.value || '';
+        
+        try {
+            let url = '/api/admin/bookings?limit=100';
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (status) url += `&booking_status=${status}`;
+            
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                allAdminBookings = data.bookings;
+                renderAdminBookings(allAdminBookings);
+            }
+        } catch (error) {
+            console.error('Error loading bookings:', error);
+        }
+    }
+    
+    function renderAdminBookings(bookings) {
+        const tbody = document.getElementById('bookingsTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = bookings.map(booking => `
+            <tr class="border-b border-gray-800 hover:bg-gray-800/50">
+                <td class="py-3 px-2 font-mono text-purple-400">${booking.booking_reference}</td>
+                <td class="py-3 px-2">
+                    <div>${booking.user_name}</div>
+                    <div class="text-sm text-gray-500">${booking.user_email}</div>
+                </td>
+                <td class="py-3 px-2 text-gray-400">${booking.show_title}</td>
+                <td class="py-3 px-2 text-gray-400">${new Date(booking.performance_date).toLocaleDateString()}</td>
+                <td class="py-3 px-2 text-gray-400">${booking.seat_count}</td>
+                <td class="py-3 px-2 text-green-400">$${booking.total_amount.toFixed(2)}</td>
+                <td class="py-3 px-2">
+                    <span class="px-2 py-1 rounded-full text-xs ${
+                        booking.booking_status === 'Confirmed' ? 'bg-green-500/20 text-green-400' :
+                        booking.booking_status === 'Pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        booking.booking_status === 'Refunded' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-red-500/20 text-red-400'
+                    }">${booking.booking_status}</span>
+                </td>
+                <td class="py-3 px-2">
+                    ${booking.booking_status === 'Confirmed' ? `
+                        <button onclick="openRefundModalAdmin(${booking.booking_id}, '${booking.booking_reference}', ${booking.total_amount})" 
+                                class="text-blue-400 hover:text-blue-300 mr-2">Refund</button>
+                    ` : ''}
+                    ${booking.booking_status !== 'Cancelled' && booking.booking_status !== 'Refunded' ? `
+                        <button onclick="cancelBookingAdmin(${booking.booking_id})" 
+                                class="text-red-400 hover:text-red-300">Cancel</button>
+                    ` : ''}
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function searchBookings() {
+        clearTimeout(window.bookingSearchTimeout);
+        window.bookingSearchTimeout = setTimeout(loadAdminBookings, 300);
+    }
+    
+    function filterBookingsAdmin() {
+        loadAdminBookings();
+    }
+    
+    async function cancelBookingAdmin(bookingId) {
+        const reason = prompt('Enter reason for cancellation:');
+        if (!reason) return;
+        
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch(`/api/admin/bookings/${bookingId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason })
+            });
+            
+            if (response.ok) {
+                alert('Booking cancelled successfully');
+                loadAdminBookings();
+            } else {
+                const error = await response.json();
+                alert(error.detail || 'Failed to cancel booking');
+            }
+        } catch (error) {
+            console.error('Error cancelling booking:', error);
+        }
+    }
+    
+    function openRefundModalAdmin(bookingId, reference, amount) {
+        document.getElementById('refundBookingId').value = bookingId;
+        document.getElementById('refundBookingRef').textContent = reference;
+        document.getElementById('refundOriginalAmount').textContent = `$${amount.toFixed(2)}`;
+        document.getElementById('refundAmount').value = '';
+        document.getElementById('refundReason').value = '';
+        
+        document.getElementById('refundModal').classList.remove('hidden');
+        document.getElementById('refundModal').classList.add('flex');
+    }
+    
+    function closeRefundModal() {
+        document.getElementById('refundModal').classList.add('hidden');
+        document.getElementById('refundModal').classList.remove('flex');
+    }
+    
+    document.getElementById('refundForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        const bookingId = document.getElementById('refundBookingId').value;
+        const amount = document.getElementById('refundAmount').value;
+        const reason = document.getElementById('refundReason').value;
+        
+        try {
+            const response = await fetch(`/api/admin/bookings/${bookingId}/refund`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reason,
+                    refund_amount: amount ? parseFloat(amount) : null
+                })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                alert(`Refund issued: $${result.refund_amount.toFixed(2)}`);
+                closeRefundModal();
+                loadAdminBookings();
+            } else {
+                const error = await response.json();
+                alert(error.detail || 'Failed to issue refund');
+            }
+        } catch (error) {
+            console.error('Error issuing refund:', error);
+        }
+    });
+
+    // =============================================
+    // RBAC - ROLE MANAGEMENT
+    // =============================================
+    
+    async function loadRoles() {
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch('/api/admin/roles', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const roles = await response.json();
+                renderRoles(roles);
+            }
+        } catch (error) {
+            console.error('Error loading roles:', error);
+        }
+    }
+    
+    function renderRoles(roles) {
+        const container = document.getElementById('rolesList');
+        if (!container) return;
+        
+        if (roles.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 col-span-3">No roles defined yet. Create one to get started.</p>';
+            return;
+        }
+        
+        container.innerHTML = roles.map(role => `
+            <div class="bg-[#0a0a0f] rounded-lg p-4 border border-gray-800">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h4 class="text-lg font-semibold text-white">${role.role_name}</h4>
+                        <p class="text-sm text-gray-500">${role.description || 'No description'}</p>
+                    </div>
+                    <span class="text-xs text-gray-500">${role.user_count} users</span>
+                </div>
+                <div class="flex flex-wrap gap-1 mb-3">
+                    ${role.can_manage_shows ? '<span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">Shows</span>' : ''}
+                    ${role.can_manage_venues ? '<span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">Venues</span>' : ''}
+                    ${role.can_manage_performances ? '<span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">Performances</span>' : ''}
+                    ${role.can_manage_bookings ? '<span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">Bookings</span>' : ''}
+                    ${role.can_view_analytics ? '<span class="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">Analytics</span>' : ''}
+                    ${role.can_manage_users ? '<span class="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded text-xs">Users</span>' : ''}
+                    ${role.can_manage_pricing ? '<span class="px-2 py-0.5 bg-pink-500/20 text-pink-400 rounded text-xs">Pricing</span>' : ''}
+                    ${role.can_issue_refunds ? '<span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded text-xs">Refunds</span>' : ''}
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="editRole(${role.role_id})" class="text-sm text-purple-400 hover:text-purple-300">Edit</button>
+                    ${role.user_count === 0 ? `<button onclick="deleteRole(${role.role_id})" class="text-sm text-red-400 hover:text-red-300">Delete</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function openRoleModal(roleId = null) {
+        document.getElementById('roleModalTitle').textContent = roleId ? 'Edit Role' : 'Add Role';
+        document.getElementById('roleId').value = roleId || '';
+        
+        if (!roleId) {
+            document.getElementById('roleName').value = '';
+            document.getElementById('roleDescription').value = '';
+            document.getElementById('permManageShows').checked = false;
+            document.getElementById('permManageVenues').checked = false;
+            document.getElementById('permManagePerformances').checked = false;
+            document.getElementById('permManageBookings').checked = false;
+            document.getElementById('permViewAnalytics').checked = false;
+            document.getElementById('permManageUsers').checked = false;
+            document.getElementById('permManagePricing').checked = false;
+            document.getElementById('permIssueRefunds').checked = false;
+        }
+        
+        document.getElementById('roleModal').classList.remove('hidden');
+        document.getElementById('roleModal').classList.add('flex');
+    }
+    
+    async function editRole(roleId) {
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch('/api/admin/roles', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const roles = await response.json();
+                const role = roles.find(r => r.role_id === roleId);
+                
+                if (role) {
+                    document.getElementById('roleId').value = role.role_id;
+                    document.getElementById('roleName').value = role.role_name;
+                    document.getElementById('roleDescription').value = role.description || '';
+                    document.getElementById('permManageShows').checked = role.can_manage_shows;
+                    document.getElementById('permManageVenues').checked = role.can_manage_venues;
+                    document.getElementById('permManagePerformances').checked = role.can_manage_performances;
+                    document.getElementById('permManageBookings').checked = role.can_manage_bookings;
+                    document.getElementById('permViewAnalytics').checked = role.can_view_analytics;
+                    document.getElementById('permManageUsers').checked = role.can_manage_users;
+                    document.getElementById('permManagePricing').checked = role.can_manage_pricing;
+                    document.getElementById('permIssueRefunds').checked = role.can_issue_refunds;
+                    
+                    openRoleModal(roleId);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading role:', error);
+        }
+    }
+    
+    function closeRoleModal() {
+        document.getElementById('roleModal').classList.add('hidden');
+        document.getElementById('roleModal').classList.remove('flex');
+    }
+    
+    document.getElementById('roleForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('access_token');
+        const roleId = document.getElementById('roleId').value;
+        
+        const data = {
+            role_name: document.getElementById('roleName').value,
+            description: document.getElementById('roleDescription').value,
+            can_manage_shows: document.getElementById('permManageShows').checked,
+            can_manage_venues: document.getElementById('permManageVenues').checked,
+            can_manage_performances: document.getElementById('permManagePerformances').checked,
+            can_manage_bookings: document.getElementById('permManageBookings').checked,
+            can_view_analytics: document.getElementById('permViewAnalytics').checked,
+            can_manage_users: document.getElementById('permManageUsers').checked,
+            can_manage_pricing: document.getElementById('permManagePricing').checked,
+            can_issue_refunds: document.getElementById('permIssueRefunds').checked
+        };
+        
+        try {
+            const url = roleId ? `/api/admin/roles/${roleId}` : '/api/admin/roles';
+            const method = roleId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert(roleId ? 'Role updated successfully' : 'Role created successfully');
+                closeRoleModal();
+                loadRoles();
+            } else {
+                const error = await response.json();
+                alert(error.detail || 'Failed to save role');
+            }
+        } catch (error) {
+            console.error('Error saving role:', error);
+        }
+    });
+    
+    async function deleteRole(roleId) {
+        if (!confirm('Are you sure you want to delete this role?')) return;
+        
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch(`/api/admin/roles/${roleId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                alert('Role deleted successfully');
+                loadRoles();
+            } else {
+                const error = await response.json();
+                alert(error.detail || 'Failed to delete role');
+            }
+        } catch (error) {
+            console.error('Error deleting role:', error);
+        }
+    }
+
+    // =============================================
+    // AUDIT LOGS
+    // =============================================
+    
+    async function loadAuditLogs() {
+        const token = localStorage.getItem('access_token');
+        const action = document.getElementById('auditActionFilter')?.value || '';
+        const entityType = document.getElementById('auditEntityFilter')?.value || '';
+        
+        try {
+            // Load filter options
+            loadAuditFilterOptions();
+            
+            let url = '/api/admin/audit-logs?limit=100';
+            if (action) url += `&action=${action}`;
+            if (entityType) url += `&entity_type=${entityType}`;
+            
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                renderAuditLogs(data.logs);
+            }
+        } catch (error) {
+            console.error('Error loading audit logs:', error);
+        }
+    }
+    
+    async function loadAuditFilterOptions() {
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const [actionsRes, typesRes] = await Promise.all([
+                fetch('/api/admin/audit-logs/actions', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/audit-logs/entity-types', { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+            
+            if (actionsRes.ok) {
+                const actions = await actionsRes.json();
+                const select = document.getElementById('auditActionFilter');
+                if (select && select.options.length <= 1) {
+                    actions.forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a;
+                        opt.textContent = a.replace(/_/g, ' ');
+                        select.appendChild(opt);
+                    });
+                }
+            }
+            
+            if (typesRes.ok) {
+                const types = await typesRes.json();
+                const select = document.getElementById('auditEntityFilter');
+                if (select && select.options.length <= 1) {
+                    types.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t;
+                        opt.textContent = t;
+                        select.appendChild(opt);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error loading filter options:', error);
+        }
+    }
+    
+    function renderAuditLogs(logs) {
+        const tbody = document.getElementById('auditLogsTableBody');
+        if (!tbody) return;
+        
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-gray-500">No audit logs found</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = logs.map(log => `
+            <tr class="border-b border-gray-800 hover:bg-gray-800/50">
+                <td class="py-3 px-2 text-gray-400 text-sm">${new Date(log.timestamp).toLocaleString()}</td>
+                <td class="py-3 px-2">
+                    <div class="text-white">${log.user_name}</div>
+                    <div class="text-xs text-gray-500">${log.user_email}</div>
+                </td>
+                <td class="py-3 px-2">
+                    <span class="px-2 py-1 rounded text-xs ${
+                        log.action.includes('CREATE') ? 'bg-green-500/20 text-green-400' :
+                        log.action.includes('UPDATE') ? 'bg-blue-500/20 text-blue-400' :
+                        log.action.includes('DELETE') || log.action.includes('CANCEL') ? 'bg-red-500/20 text-red-400' :
+                        'bg-gray-500/20 text-gray-400'
+                    }">${log.action.replace(/_/g, ' ')}</span>
+                </td>
+                <td class="py-3 px-2 text-gray-400">${log.entity_type} ${log.entity_id ? '#' + log.entity_id : ''}</td>
+                <td class="py-3 px-2">
+                    <button onclick="showAuditDetails(${JSON.stringify(log).replace(/"/g, '&quot;')})" 
+                            class="text-purple-400 hover:text-purple-300 text-sm">View Details</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    function filterAuditLogs() {
+        loadAuditLogs();
+    }
+    
+    function showAuditDetails(log) {
+        let details = `Action: ${log.action}\nEntity: ${log.entity_type} #${log.entity_id || 'N/A'}\nUser: ${log.user_name}\nTime: ${new Date(log.timestamp).toLocaleString()}\nIP: ${log.ip_address || 'N/A'}`;
+        
+        if (log.old_values) {
+            details += `\n\nOld Values:\n${JSON.stringify(log.old_values, null, 2)}`;
+        }
+        if (log.new_values) {
+            details += `\n\nNew Values:\n${JSON.stringify(log.new_values, null, 2)}`;
+        }
+        
+        alert(details);
     }
 
     // CSS for active tab
