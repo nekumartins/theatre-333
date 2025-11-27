@@ -1,7 +1,52 @@
-from sqlalchemy import Column, Integer, String, Text, Date, Time, DECIMAL, TIMESTAMP, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, Time, DECIMAL, TIMESTAMP, Boolean, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
+
+
+class Role(Base):
+    """Role-based access control - defines user roles and their permissions"""
+    __tablename__ = "role"
+    
+    role_id = Column(Integer, primary_key=True, autoincrement=True)
+    role_name = Column(String(50), unique=True, nullable=False)  # Admin, Manager, Staff, Customer
+    description = Column(Text)
+    
+    # Granular permissions
+    can_manage_shows = Column(Boolean, default=False)
+    can_manage_venues = Column(Boolean, default=False)
+    can_manage_performances = Column(Boolean, default=False)
+    can_manage_bookings = Column(Boolean, default=False)
+    can_view_analytics = Column(Boolean, default=False)
+    can_manage_users = Column(Boolean, default=False)
+    can_manage_pricing = Column(Boolean, default=False)
+    can_issue_refunds = Column(Boolean, default=False)
+    
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    
+    # Relationships
+    users = relationship("User", back_populates="role")
+
+
+class AuditLog(Base):
+    """Audit trail for tracking admin/staff actions"""
+    __tablename__ = "audit_log"
+    
+    log_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("user.user_id"), nullable=False)
+    action = Column(String(100), nullable=False)  # e.g., "CREATE_SHOW", "UPDATE_BOOKING", "ISSUE_REFUND"
+    entity_type = Column(String(50), nullable=False)  # e.g., "Show", "Booking", "User"
+    entity_id = Column(Integer)  # ID of the affected entity
+    old_values = Column(JSON)  # Previous state (for updates)
+    new_values = Column(JSON)  # New state
+    ip_address = Column(String(45))
+    user_agent = Column(String(255))
+    timestamp = Column(TIMESTAMP, server_default=func.now())
+    
+    # Relationships
+    user = relationship("User", back_populates="audit_logs")
+
 
 class Genre(Base):
     __tablename__ = "genre"
@@ -31,13 +76,16 @@ class User(Base):
     country = Column(String(50))
     registration_date = Column(Date, nullable=False)
     email_verified = Column(Boolean, default=False)
-    account_status = Column(String(20), default="Active")
-    is_admin = Column(Boolean, default=False)
+    account_status = Column(String(20), default="Active")  # Active, Suspended, Deactivated
+    is_admin = Column(Boolean, default=False)  # Legacy field - kept for backward compatibility
+    role_id = Column(Integer, ForeignKey("role.role_id"), nullable=True)  # New RBAC field
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
     
     # Relationships
     bookings = relationship("Booking", back_populates="user")
+    role = relationship("Role", back_populates="users")
+    audit_logs = relationship("AuditLog", back_populates="user")
 
 
 class Show(Base):
